@@ -19,7 +19,6 @@ int	init_program(t_program *program)
         program->philosophers[i].left_fork = &program->forks[i];
         program->philosophers[i].right_fork = &program->forks[(i + 1) % 
             program->number_of_philosophers];
-        program->philosophers[i].program = program;
         i++;
     }
     return (create_threads(program));
