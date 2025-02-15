@@ -14,6 +14,7 @@ typedef struct s_philosopher
     int             id;
     pthread_mutex_t *left_fork;
     pthread_mutex_t *right_fork;
+    struct s_program *program;
 } t_philosopher;
 
 
@@ -34,5 +35,7 @@ typedef struct s_program
 void    ft_putstr(char *str);
 int     check_args(int ac, char **av);
 int     init_program_args(t_program *program, int ac, char **av);
-
+void    eat(t_philosopher *philo);
+int	init_program(t_program *program);
+void clean_program(t_program *program);
 #endif
