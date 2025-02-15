@@ -16,11 +16,13 @@ void eat(t_philosopher *philo)
 void	*philosopher_routine(void *arg)
 {
     t_philosopher	*philo;
+    int i;
 
+    i =-1;
     philo = (t_philosopher *)arg;
     if (philo->id % 2)
         usleep(1000);
-    while (1)
+    while (++i < philo->program->must_eat_count)
     {
         eat(philo);
         printf("%d is sleeping\n", philo->id + 1);
