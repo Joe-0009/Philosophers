@@ -37,7 +37,7 @@ void *death_monitor(void *arg)
         while (++i < prog->number_of_philosophers && !prog->someone_died)
         {
             philo = &prog->philosophers[i];
-            if (get_current_time() - philo->last_meal >= prog->time_to_die)
+            if (get_current_time() - philo->last_meal > prog->time_to_die)
             {
                 print_status(philo, "died");
                 prog->someone_died = 1;
@@ -47,22 +47,31 @@ void *death_monitor(void *arg)
                 philo->number_of_meals < prog->must_eat_count)
                 all_ate = 0;
         }
+        if (prog->must_eat_count != -1 && all_ate)
+            return (NULL);
     }
     return (NULL);
 }
 
- void	eat(t_philosopher *philo)
+void eat(t_philosopher *philo)
 {
-    pthread_mutex_lock(philo->left_fork);
+    if (philo->id % 2 == 0)
+    {
+        pthread_mutex_lock(philo->left_fork);
+        pthread_mutex_lock(philo->right_fork);
+    }
+    else
+    {
+        pthread_mutex_lock(philo->right_fork);
+        pthread_mutex_lock(philo->left_fork);
+    }
     print_status(philo, "has taken a fork");
-    pthread_mutex_lock(philo->right_fork);
     print_status(philo, "has taken a fork");
-    
     print_status(philo, "is eating");
     philo->last_meal = get_current_time();
     usleep(philo->program->time_to_eat * 1000);
     philo->number_of_meals++;
-    
+
     pthread_mutex_unlock(philo->left_fork);
     pthread_mutex_unlock(philo->right_fork);
 }
@@ -72,7 +81,7 @@ void	*philosopher_routine(void *arg)
 
     philo = (t_philosopher *)arg;
     if (philo->id % 2)
-        usleep(1000);
+        usleep(30);
     while (!philo->program->someone_died)
     {
         eat(philo);
@@ -82,6 +91,7 @@ void	*philosopher_routine(void *arg)
         print_status(philo, "is sleeping");
         usleep(philo->program->time_to_sleep * 1000);
         print_status(philo, "is thinking");
+        usleep(30);
     }
     return (NULL);
 }
