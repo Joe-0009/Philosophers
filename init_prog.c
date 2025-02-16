@@ -1,5 +1,13 @@
 #include "philosophers.h"
 
+long long get_current_time(void)
+{
+    struct timeval time;
+
+    gettimeofday(&time, NULL);
+    return ((time.tv_sec * 1000) + (time.tv_usec / 1000));
+}
+
 void eat(t_philosopher *philo)
 {
     pthread_mutex_lock(philo->left_fork);
@@ -8,7 +16,9 @@ void eat(t_philosopher *philo)
     printf("%d has taken a fork\n", philo->id + 1);
 
     printf("%d is eating\n", philo->id + 1);
+    philo->last_meal = get_current_time();
     usleep(philo->program->time_to_eat * 1000);
+    philo->number_of_meals++;
 
     pthread_mutex_unlock(philo->left_fork);
     pthread_mutex_unlock(philo->right_fork);
@@ -25,11 +35,11 @@ void	*philosopher_routine(void *arg)
     while (philo->number_of_meals < philo->program->must_eat_count)
     {
         eat(philo);
-        philo->number_of_meals++;
         printf("%d is sleeping\n", philo->id + 1);
         usleep(philo->program->time_to_sleep * 1000);
         printf("%d is thinking\n", philo->id + 1);
     }
+    printf("%d done eating \n", philo->id + 1);
     return (NULL);
 }
 
@@ -47,8 +57,6 @@ static int	create_threads(t_program *program)
     }
     return (0);
 }
-
-
 
 int	init_program(t_program *program)
 {
