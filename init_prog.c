@@ -22,9 +22,10 @@ void	*philosopher_routine(void *arg)
     philo = (t_philosopher *)arg;
     if (philo->id % 2)
         usleep(1000);
-    while (++i < philo->program->must_eat_count)
+    while (philo->number_of_meals < philo->program->must_eat_count)
     {
         eat(philo);
+        philo->number_of_meals++;
         printf("%d is sleeping\n", philo->id + 1);
         usleep(philo->program->time_to_sleep * 1000);
         printf("%d is thinking\n", philo->id + 1);
@@ -67,7 +68,8 @@ int	init_program(t_program *program)
         program->philosophers[i].left_fork = &program->forks[i];
         program->philosophers[i].right_fork = &program->forks[(i + 1) % 
             program->number_of_philosophers];
-        program->philosophers[i].program = program; 
+        program->philosophers[i].program = program;
+        program->philosophers[i].number_of_meals = 0;
         i++;
     }
     return (create_threads(program));

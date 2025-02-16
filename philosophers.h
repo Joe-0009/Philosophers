@@ -12,6 +12,7 @@
 typedef struct s_philosopher
 {
     int             id;
+    int             number_of_meals;
     pthread_mutex_t *left_fork;
     pthread_mutex_t *right_fork;
     struct s_program *program;
