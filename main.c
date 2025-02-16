@@ -12,6 +12,5 @@ int main(int ac, char **av)
         exit(EXIT_FAILURE);
     }
     init_program(&program);
-    sleep(30);
     clean_program(&program);
 }
