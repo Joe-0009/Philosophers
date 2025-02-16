@@ -8,38 +8,46 @@ long long get_current_time(void)
     return ((time.tv_sec * 1000) + (time.tv_usec / 1000));
 }
 
-void eat(t_philosopher *philo)
+void print_status(t_philosopher *philo, char *status)
+{
+    long long current_time;
+
+    current_time = get_current_time() - philo->program->start_time;
+    printf("%lld %d %s\n", current_time, philo->id + 1, status);
+}
+
+ void	eat(t_philosopher *philo)
 {
     pthread_mutex_lock(philo->left_fork);
-    printf("%d has taken a fork\n", philo->id + 1);
+    print_status(philo, "has taken a fork");
     pthread_mutex_lock(philo->right_fork);
-    printf("%d has taken a fork\n", philo->id + 1);
-
-    printf("%d is eating\n", philo->id + 1);
+    print_status(philo, "has taken a fork");
+    
+    print_status(philo, "is eating");
     philo->last_meal = get_current_time();
     usleep(philo->program->time_to_eat * 1000);
     philo->number_of_meals++;
-
+    
     pthread_mutex_unlock(philo->left_fork);
     pthread_mutex_unlock(philo->right_fork);
 }
 void	*philosopher_routine(void *arg)
 {
     t_philosopher	*philo;
-    int i;
 
-    i =-1;
     philo = (t_philosopher *)arg;
     if (philo->id % 2)
         usleep(1000);
-    while (philo->number_of_meals < philo->program->must_eat_count)
+    while (1)
     {
         eat(philo);
-        printf("%d is sleeping\n", philo->id + 1);
+        if (philo->program->must_eat_count != -1 && 
+            philo->number_of_meals >= philo->program->must_eat_count)
+            break ;
+        print_status(philo, "is sleeping");
         usleep(philo->program->time_to_sleep * 1000);
-        printf("%d is thinking\n", philo->id + 1);
+        print_status(philo, "is thinking");
     }
-    printf("%d done eating \n", philo->id + 1);
     return (NULL);
 }
 
@@ -47,9 +55,11 @@ static int	create_threads(t_program *program)
 {
     int			i;
 
+    program->start_time = get_current_time();
     i = 0;
     while (i < program->number_of_philosophers)
     {
+        program->philosophers[i].last_meal = get_current_time();
         if (pthread_create(&program->threads[i], NULL, 
             philosopher_routine, &program->philosophers[i]))
             return (1);

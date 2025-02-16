@@ -27,6 +27,7 @@ typedef struct s_program
     int             time_to_eat;
     int             time_to_sleep;
     int             must_eat_count;
+    long long       start_time;
     pthread_mutex_t *forks;
     pthread_t       *threads;
     t_philosopher   *philosophers;
