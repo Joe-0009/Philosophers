@@ -38,6 +38,10 @@ typedef struct s_program
 	t_philosopher		*philosophers;
 }						t_program;
 
+
+long long	get_current_time(void);
+void	print_status(t_philosopher *philo, char *status);
+
 void					ft_putstr(char *str);
 int						check_args(int ac, char **av);
 int						init_program_args(t_program *program, int ac,

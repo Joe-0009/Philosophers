@@ -1,6 +1,6 @@
 NAME = philo
 CC = cc 
-CFLAGS = -Wall -Wextra -Werror -pthread -fsanitize=thread -g3
+CFLAGS = -Wall -Wextra -Werror -pthread -fsanitize=thread  -g3
 SRCS = main.c \
        args_check.c \
        init_prog.c
