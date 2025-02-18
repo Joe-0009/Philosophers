@@ -29,10 +29,12 @@ typedef struct s_program
 	int					must_eat_count;
 	long long			start_time;
 	int					someone_died;
+
 	pthread_mutex_t		death_status;
 	pthread_mutex_t		print;
 	pthread_mutex_t		*forks;
 	pthread_t			*threads;
+	pthread_t			monitor;
 	t_philosopher		*philosophers;
 }						t_program;
 
