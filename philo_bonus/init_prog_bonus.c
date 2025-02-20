@@ -51,33 +51,24 @@ int	run(t_program *program)
 	int	i;
 
 	i = -1;
-	while (++i < program->number_of_philosophers)
-	{
-		program->philosophers[i].id = i;
-		program->philosophers[i].process_id = fork();
-		program->start_time = get_current_time();
-		program->philosophers[i].program = program;
-		program->philosophers[i].number_of_meals = 0;
-		program->philosophers[i].last_meal = get_current_time();
+	
 		if (program->philosophers[i].process_id == 0)
-		{
 			philosopher_routine(&program->philosophers[i]);
-			exit(EXIT_SUCCESS);
-		}
 		if (get_current_time()
 			- program->philosophers[i].last_meal >= program->time_to_die)
 		{
 			printf("%lld %d %s\n", get_current_time() - program->start_time,
 				program->philosophers[i].id + 1, "died");
-			program->someone_died = 1;
-			return (1);
+			program->someone_died = 1;	
+			printf("jahahshhahshdah\n");
 		}
-	}
+	
 	return (0);
 }
 
 int	init_program(t_program *program)
 {
+	int i;
 	program->someone_died = 0;
 	program->philosophers = malloc(sizeof(t_philosopher)
 			* program->number_of_philosophers);
@@ -86,6 +77,18 @@ int	init_program(t_program *program)
 		if (program->philosophers)
 			free(program->philosophers);
 		return (1);
+	}
+	i = -1;
+	while (++i < program->number_of_philosophers)
+	{
+		program->philosophers[i].id = i;
+		
+		program->philosophers[i].process_id = fork();
+		if (getpid() != 0)
+		program->start_time = get_current_time();
+		program->philosophers[i].program = program;
+		program->philosophers[i].number_of_meals = 0;
+		program->philosophers[i].last_meal = get_current_time();
 	}
 	return (run(program));
 }

@@ -9,7 +9,7 @@
 # include <sys/time.h>
 # include <sys/wait.h>
 # include <unistd.h>
-
+# include <signal.h>
 typedef struct s_philosopher
 {
 	int					id;
