@@ -7,11 +7,13 @@
 # include <stdio.h>
 # include <stdlib.h>
 # include <sys/time.h>
+# include <sys/wait.h>
 # include <unistd.h>
 
 typedef struct s_philosopher
 {
 	int					id;
+	int process_id;
 	int					number_of_meals;
 	long long			last_meal;
 	struct s_program	*program;

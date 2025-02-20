@@ -10,4 +10,5 @@ int main(int ac, char **av)
         return (EXIT_FAILURE);
     init_program(&program);
     clean_program(&program);
+    return (0);
 }
