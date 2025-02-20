@@ -124,7 +124,7 @@ void	eat(t_philosopher *philo)
 	}
 	set_nofmeals_time(philo);
 	print_status(philo, "is eating");
-	ft_usleep(philo->program->time_to_eat * 1000);
+	ft_usleep(philo->program->time_to_eat);
 	pthread_mutex_unlock(philo->left_fork);
 	pthread_mutex_unlock(philo->right_fork);
 }
@@ -135,7 +135,7 @@ void	*philosopher_routine(void *arg)
 
 	philo = (t_philosopher *)arg;
 	if (philo->id % 2)
-		ft_usleep(philo->program->time_to_eat * 100);
+		ft_usleep(philo->program->time_to_eat);
 	while (!is_someone_dead(philo->program))
 	{
 		eat(philo);
@@ -143,9 +143,8 @@ void	*philosopher_routine(void *arg)
 			&& philo->number_of_meals >= philo->program->must_eat_count)
 			break ;
 		print_status(philo, "is sleeping");
-		ft_usleep(philo->program->time_to_sleep * 1000);
+		ft_usleep(philo->program->time_to_sleep);
 		print_status(philo, "is thinking");
-		ft_usleep(100);
 	}
 	return (NULL);
 }

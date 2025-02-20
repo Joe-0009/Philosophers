@@ -56,10 +56,6 @@ void *add_five(void *n)
 #include <unistd.h>
 #include <sys/time.h>
 
-/*
-** Returns the timestamp in milliseconds
-*/
-
 long    get_time(void)
 {
     struct timeval  tp;
@@ -71,9 +67,6 @@ long    get_time(void)
     return (milliseconds);
 }
 
-/*
-** Prints time, sleeps 200ms, repeats!
-*/
 
 int	ft_usleep(size_t milliseconds)
 {
@@ -89,16 +82,16 @@ int main(void)
 {
     long start_time;
 		
-		// Remember when we started
+		
     start_time = get_time();
 
     int i = -1;
     while (++i < 10 )
     {
-				// Print time from start, in ms
+				
         printf("%ld\n", get_time() - start_time);
 
-				// Sleep 200 times 1000 microseconds (1 millisecond)
+				
         usleep(200 * 1000);
     }
 
@@ -107,10 +100,10 @@ int main(void)
      i = -1;
     while (++i < 10 )
     {
-				// Print time from start, in ms
+			
         printf("%ld\n", get_time() - start_time);
 
-				// Sleep 200 times 1000 microseconds (1 millisecond)
+				
         ft_usleep(200);
     }
 }
