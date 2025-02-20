@@ -1,11 +1,24 @@
 #include "philosophers.h"
 
-long long	get_current_time(void)
+long  long  get_current_time(void)
 {
-	struct timeval	time;
+    struct timeval  tp;
+    long            milliseconds;
 
-	gettimeofday(&time, NULL);
-	return ((time.tv_sec * 1000) + (time.tv_usec / 1000));
+    gettimeofday(&tp, NULL);
+    milliseconds = tp.tv_sec * 1000;
+    milliseconds += tp.tv_usec / 1000;
+    return (milliseconds);
+}
+
+int	ft_usleep(size_t milliseconds)
+{
+	size_t	start;
+
+	start = get_current_time();
+	while ((get_current_time() - start) < milliseconds)
+		usleep(500);
+	return (0);
 }
 
 int	is_someone_dead(t_program *prog)
@@ -81,7 +94,7 @@ void	*death_monitor(void *arg)
 		}
 		if (prog->must_eat_count != -1 && all_ate)
 			return (write(1, "all ate \n", 10), NULL);
-		usleep(100);
+		ft_usleep(100);
 	}
 	return (NULL);
 }
@@ -111,7 +124,7 @@ void	eat(t_philosopher *philo)
 	}
 	set_nofmeals_time(philo);
 	print_status(philo, "is eating");
-	usleep(philo->program->time_to_eat * 1000);
+	ft_usleep(philo->program->time_to_eat * 1000);
 	pthread_mutex_unlock(philo->left_fork);
 	pthread_mutex_unlock(philo->right_fork);
 }
@@ -122,7 +135,7 @@ void	*philosopher_routine(void *arg)
 
 	philo = (t_philosopher *)arg;
 	if (philo->id % 2)
-		usleep(philo->program->time_to_eat * 100);
+		ft_usleep(philo->program->time_to_eat * 100);
 	while (!is_someone_dead(philo->program))
 	{
 		eat(philo);
@@ -130,9 +143,9 @@ void	*philosopher_routine(void *arg)
 			&& philo->number_of_meals >= philo->program->must_eat_count)
 			break ;
 		print_status(philo, "is sleeping");
-		usleep(philo->program->time_to_sleep * 1000);
+		ft_usleep(philo->program->time_to_sleep * 1000);
 		print_status(philo, "is thinking");
-		usleep(100);
+		ft_usleep(100);
 	}
 	return (NULL);
 }

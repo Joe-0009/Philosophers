@@ -22,31 +22,95 @@ void *add_five(void *n)
     return NULL;
 }
 
-int main()
+// int main()
+// {
+//     t_data data;
+//     pthread_t p[10];
+//     int  i = -1;
+//     int n = 5;
+
+//     pthread_mutex_t lock;
+//     pthread_mutex_init(&lock, NULL);
+
+//     data.lock = &lock;
+//     data.n = &n;
+
+//     printf("Before threads: %d\n", n);
+//     while (++i < 10)
+//     {
+//         pthread_create(&p[i], NULL, add_five, &data);
+//     }
+
+//     i = -1;
+//     while (++i < 10)
+//         pthread_join(p[i], NULL);
+    
+//     printf("After joining threads, n = %d\n", n);
+
+//     pthread_mutex_destroy(&lock);
+//     return 0;
+// }
+
+
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/time.h>
+
+/*
+** Returns the timestamp in milliseconds
+*/
+
+long    get_time(void)
 {
-    t_data data;
-    pthread_t p[10];
-    int  i = -1;
-    int n = 5;
+    struct timeval  tp;
+    long            milliseconds;
 
-    pthread_mutex_t lock;
-    pthread_mutex_init(&lock, NULL);
+    gettimeofday(&tp, NULL);
+    milliseconds = tp.tv_sec * 1000;
+    milliseconds += tp.tv_usec / 1000;
+    return (milliseconds);
+}
 
-    data.lock = &lock;
-    data.n = &n;
+/*
+** Prints time, sleeps 200ms, repeats!
+*/
 
-    printf("Before threads: %d\n", n);
-    while (++i < 10)
+int	ft_usleep(size_t milliseconds)
+{
+	size_t	start;
+
+	start = get_time();
+	while ((get_time() - start) < milliseconds)
+		usleep(500);
+	return (0);
+}
+
+int main(void)
+{
+    long start_time;
+		
+		// Remember when we started
+    start_time = get_time();
+
+    int i = -1;
+    while (++i < 10 )
     {
-        pthread_create(&p[i], NULL, add_five, &data);
+				// Print time from start, in ms
+        printf("%ld\n", get_time() - start_time);
+
+				// Sleep 200 times 1000 microseconds (1 millisecond)
+        usleep(200 * 1000);
     }
 
-    i = -1;
-    while (++i < 10)
-        pthread_join(p[i], NULL);
-    
-    printf("After joining threads, n = %d\n", n);
+    start_time = get_time();
 
-    pthread_mutex_destroy(&lock);
-    return 0;
+     i = -1;
+    while (++i < 10 )
+    {
+				// Print time from start, in ms
+        printf("%ld\n", get_time() - start_time);
+
+				// Sleep 200 times 1000 microseconds (1 millisecond)
+        ft_usleep(200);
+    }
 }

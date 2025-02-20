@@ -7,7 +7,7 @@ int handle_one_philo(t_program *prog)
     prog->start_time = get_current_time();
     start_time = get_current_time() - prog->start_time ;
     printf("%lld %d %s\n", start_time, 1, "has taken a fork");
-    usleep(prog->time_to_die * 1000);
+    ft_usleep(prog->time_to_die);
     start_time = get_current_time() - prog->start_time ;
     printf("%lld %d %s\n", start_time, 1, "is dead");
     return (0);
