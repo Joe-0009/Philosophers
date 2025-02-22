@@ -1,9 +1,12 @@
-NAME = philo
+NAME = philo_bonus
 CC = cc 
-CFLAGS = -Wall -Wextra -Werror -pthread -fsanitize=thread  -g3
+CFLAGS = -Wall -Wextra -Werror  
 SRCS = main.c \
        args_check_bonus.c \
-       init_prog_bonus.c
+       init_bonus.c \
+	   cleanup_bonus.c \
+	   philosopher_bonus.c \
+	   time_utils_bonus.c
 
 
 OBJS = $(SRCS:.c=.o)
