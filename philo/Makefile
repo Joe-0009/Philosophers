@@ -3,7 +3,12 @@ CC = cc
 CFLAGS = -Wall -Wextra -Werror -pthread -fsanitize=thread  -g3
 SRCS = main.c \
        args_check.c \
-       init_prog.c
+       init_program.c \
+	   philo_actions.c \
+	   philo_routine.c \
+	   time.c \
+	   utils.c \
+
 
 
 OBJS = $(SRCS:.c=.o)

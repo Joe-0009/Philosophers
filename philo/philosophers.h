@@ -1,4 +1,3 @@
-
 #ifndef PHILOSOPHERS_H
 # define PHILOSOPHERS_H
 
@@ -29,23 +28,36 @@ typedef struct s_program
 	int					must_eat_count;
 	long long			start_time;
 	int					someone_died;
-
 	pthread_mutex_t		death_status;
 	pthread_mutex_t		print;
 	pthread_mutex_t		*forks;
 	pthread_t			*threads;
-	pthread_t			monitor;
 	t_philosopher		*philosophers;
 }						t_program;
 
-long long				get_current_time(void);
-int						ft_usleep(size_t milliseconds);
-void					print_status(t_philosopher *philo, char *status);
-void					ft_putstr(char *str);
-int						check_args(int ac, char **av);
-int						init_program_args(t_program *program, int ac,
-							char **av);
-void					eat(t_philosopher *philo);
-int						init_program(t_program *program);
-void					clean_program(t_program *program);
+/* time functions */
+long long	get_current_time(void);
+int			ft_usleep(size_t milliseconds);
+
+/* utility functions */
+void		print_status(t_philosopher *philo, char *status);
+void		ft_putstr(char *str);
+int			is_someone_dead(t_program *prog);
+
+/* initialization functions */
+int			check_args(int ac, char **av);
+int			init_program_args(t_program *program, int ac, char **av);
+int			init_program(t_program *program);
+int			init_mutexes(t_program *program);
+void		init_philosophers(t_program *program);
+
+/* philosopher actions */
+int		eat(t_philosopher *philo);
+int		sleep_think_actions(t_philosopher *philo);
+int			death_check(t_philosopher *philo);
+void		*philosopher_routine(void *arg);
+
+/* cleanup functions */
+void		clean_program(t_program *program);
+
 #endif
