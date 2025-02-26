@@ -78,6 +78,8 @@ int	eat(t_philosopher *philo)
 
 int		sleep_think_actions(t_philosopher *philo)
 {
+	int think_time;
+
 	if (death_check(philo) || is_someone_dead(philo->program))
 		return (1);
 	print_status(philo, "is sleeping");
@@ -85,8 +87,10 @@ int		sleep_think_actions(t_philosopher *philo)
     if (death_check(philo) || is_someone_dead(philo->program))
 		return (1);
 	print_status(philo, "is thinking");
+	think_time = (philo->program->time_to_die - 
+                     (philo->program->time_to_eat + philo->program->time_to_sleep));
 	if (philo->id % 2 == 0)
-		usleep(1);
+		usleep(think_time);
 	return (0);
 }
 

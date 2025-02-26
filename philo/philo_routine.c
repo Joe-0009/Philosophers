@@ -38,8 +38,8 @@ void	*philosopher_routine(void *arg)
 	t_philosopher	*philo;
 
 	philo = (t_philosopher *)arg;
-	if (philo->id % 2 )
-		usleep(1);
+	if (philo->id % 2)
+		ft_usleep(1);
 	while (!death_check(philo) && !is_someone_dead(philo->program))
 	{
 		if (eat(philo))

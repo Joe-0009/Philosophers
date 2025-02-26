@@ -1,0 +1,1904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Dining Philosophers Visualizer</title>
+    <style>
+        :root {
+            --primary-color: #007aff;
+            --eating-color: #2ecc71;
+            --thinking-color: #3498db;
+            --sleeping-color: #9b59b6;
+            --hungry-color: #f39c12;
+            --dead-color: #e74c3c;
+            --fork-color: #95a5a6;
+            --fork-taken-color: #e67e22;
+            --table-color: #8a6d3b;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f7;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 15px 0;
+            margin-bottom: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1, h2, h3, h4 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .app-title {
+            font-size: 2.2rem;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1rem;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            gap: 20px;
+        }
+        
+        .main-panel {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        
+        .parameters-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        
+        input[type="number"], 
+        input[type="text"], 
+        textarea {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+        }
+        
+        button:hover {
+            background-color: #0056b3;
+        }
+        
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .buttons-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        
+        .visualization-container {
+            position: relative;
+            height: 600px;
+            width: 100%;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #f9f9f9;
+        }
+        
+        .visualization-area {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .table {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background-color: var(--table-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 1;
+        }
+        
+        .table::after {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background-color: #7D5F2A;
+            border-radius: 50%;
+            box-shadow: inset 0 3px 10px rgba(0,0,0,0.2);
+        }
+        
+        .philosopher {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background-color: var(--thinking-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            transition: all 0.5s ease;
+            z-index: 10;
+        }
+        
+        .philosopher::before {
+            content: attr(data-id);
+            position: absolute;
+            top: -15px;
+            font-size: 1rem;
+            color: #333;
+            background: white;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        
+        .philosopher.eating {
+            background-color: var(--eating-color);
+            transform: scale(1.1);
+        }
+        
+        .philosopher.thinking {
+            background-color: var(--thinking-color);
+        }
+        
+        .philosopher.sleeping {
+            background-color: var(--sleeping-color);
+        }
+        
+        .philosopher.hungry {
+            background-color: var(--hungry-color);
+        }
+        
+        .philosopher.dead {
+            background-color: var(--dead-color);
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .fork {
+            position: absolute;
+            width: 50px;
+            height: 10px;
+            background-color: var(--fork-color);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            z-index: 5;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .fork::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: 0;
+            width: 15px;
+            height: 20px;
+            background-color: inherit;
+            border-radius: 2px;
+        }
+        
+        .fork.taken {
+            background-color: var(--fork-taken-color);
+            box-shadow: 0 0 10px var(--fork-taken-color);
+        }
+        
+        .timeline-container {
+            width: 100%;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        .timeline-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .timeline-slider {
+            flex-grow: 1;
+            height: 10px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #ddd;
+            border-radius: 5px;
+            outline: none;
+        }
+        
+        .timeline-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+        }
+        
+        .control-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            background: var(--primary-color);
+        }
+        
+        .control-button.restart {
+            font-size: 1rem;
+        }
+        
+        .timeline-track {
+            height: 150px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        
+        .timeline-event {
+            padding: 5px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .timeline-event.eating { background-color: rgba(46, 204, 113, 0.2); }
+        .timeline-event.thinking { background-color: rgba(52, 152, 219, 0.2); }
+        .timeline-event.sleeping { background-color: rgba(155, 89, 182, 0.2); }
+        .timeline-event.fork { background-color: rgba(243, 156, 18, 0.2); }
+        .timeline-event.dead { background-color: rgba(231, 76, 60, 0.2); }
+        
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 15px 0;
+            justify-content: center;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+        
+        .thinking-color { background-color: var(--thinking-color); }
+        .eating-color { background-color: var(--eating-color); }
+        .sleeping-color { background-color: var(--sleeping-color); }
+        .hungry-color { background-color: var(--hungry-color); }
+        .dead-color { background-color: var(--dead-color); }
+        
+        .analytics-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .analytics-card {
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+        
+        .analytics-card h4 {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            color: #555;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 15px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            border-bottom-color: var(--primary-color);
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+        }
+        
+        .stat-card {
+            background: #f9f9f9;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.8rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        th, td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background: #f5f5f5;
+            font-weight: 500;
+        }
+        
+        .progress-bar-container {
+            height: 15px;
+            background: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-bar.eating { background-color: var(--eating-color); }
+        .progress-bar.thinking { background-color: var(--thinking-color); }
+        .progress-bar.sleeping { background-color: var(--sleeping-color); }
+        .progress-bar.hungry { background-color: var(--hungry-color); }
+        
+        .input-output-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+        
+        .input-container, .output-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .error {
+            color: var(--dead-color);
+            font-size: 0.9rem;
+            padding: 10px;
+            background: rgba(231, 76, 60, 0.1);
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-left: 4px solid var(--primary-color);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            border-radius: 5px;
+            max-width: 300px;
+            display: none;
+            animation: slideIn 0.3s forwards;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .chart-container {
+            height: 200px;
+            margin-top: 15px;
+        }
+        
+        .deadlock-warning {
+            color: var(--dead-color);
+            padding: 10px;
+            background: rgba(231, 76, 60, 0.1);
+            border-radius: 5px;
+            margin-top: 10px;
+            font-weight: bold;
+            display: none;
+        }
+        
+        /* For smaller screens */
+        @media (max-width: 1200px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .input-output-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="app-title">Advanced Dining Philosophers Visualizer</h1>
+            <p class="subtitle">A comprehensive tool for visualizing, analyzing, and debugging the Dining Philosophers problem</p>
+        </header>
+        
+        <div class="dashboard">
+            <div class="main-panel">
+                <div class="card">
+                    <h3>Simulation Parameters</h3>
+                    <div class="parameters-form">
+                        <div class="form-group">
+                            <label for="num-philosophers">Number of Philosophers</label>
+                            <input type="number" id="num-philosophers" min="1" max="50" value="5">
+                        </div>
+                        <div class="form-group">
+                            <label for="time-to-die">Time to Die (ms)</label>
+                            <input type="number" id="time-to-die" min="10" value="800">
+                        </div>
+                        <div class="form-group">
+                            <label for="time-to-eat">Time to Eat (ms)</label>
+                            <input type="number" id="time-to-eat" min="10" value="200">
+                        </div>
+                        <div class="form-group">
+                            <label for="time-to-sleep">Time to Sleep (ms)</label>
+                            <input type="number" id="time-to-sleep" min="10" value="200">
+                        </div>
+                        <div class="form-group">
+                            <label for="num-must-eat">Number of Times Each Must Eat (optional)</label>
+                            <input type="number" id="num-must-eat" min="0" value="0">
+                        </div>
+                    </div>
+                    
+                    <div class="buttons-row">
+                        <button id="setup-btn" class="primary-btn">Setup Simulation</button>
+                        <button id="run-command-btn" class="primary-btn">Generate Run Command</button>
+                        <button id="generate-btn" class="primary-btn" disabled>Generate Test Data</button>
+                    </div>
+                </div>
+                
+                <div class="visualization-container">
+                    <div class="visualization-area">
+                        <div class="table"></div>
+                        <div id="philosophers-container"></div>
+                        <div id="forks-container"></div>
+                    </div>
+                </div>
+                
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color thinking-color"></div>
+                        <span>Thinking</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color eating-color"></div>
+                        <span>Eating</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color sleeping-color"></div>
+                        <span>Sleeping</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color hungry-color"></div>
+                        <span>Hungry</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color dead-color"></div>
+                        <span>Dead</span>
+                    </div>
+                </div>
+                
+                <div class="timeline-container">
+                    <h3>Timeline</h3>
+                    <div class="timeline-controls">
+                        <button id="play-btn" class="control-button">▶</button>
+                        <button id="pause-btn" class="control-button">⏸</button>
+                        <button id="restart-btn" class="control-button restart">⟳</button>
+                        <input type="range" id="time-slider" class="timeline-slider" min="0" max="100" value="0">
+                        <span id="current-time">0 ms</span>
+                    </div>
+                    
+                    <div class="deadlock-warning" id="deadlock-warning">
+                        Potential deadlock detected! No activity for more than 1000ms.
+                    </div>
+                    
+                    <div id="timeline-track" class="timeline-track">
+                        <p>Timeline events will appear here after parsing output</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="tabs">
+                        <div class="tab active" data-tab="stats">Statistics</div>
+                        <div class="tab" data-tab="analytics">Analytics</div>
+                        <div class="tab" data-tab="charts">Charts</div>
+                    </div>
+                    
+                    <div class="tab-content active" id="stats-tab">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value" id="total-eating">0</div>
+                                <div class="stat-label">Total Eating</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="total-thinking">0</div>
+                                <div class="stat-label">Total Thinking</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="total-sleeping">0</div>
+                                <div class="stat-label">Total Sleeping</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="total-forks">0</div>
+                                <div class="stat-label">Fork Takes</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="total-deaths">0</div>
+                                <div class="stat-label">Deaths</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="sim-time">0</div>
+                                <div class="stat-label">Sim Time (ms)</div>
+                            </div>
+                        </div>
+                        
+                        <h4 style="margin-top: 20px;">Per Philosopher Stats</h4>
+                        <div id="philosopher-stats">
+                            <p>Run simulation to see per-philosopher statistics</p>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="analytics-tab">
+                        <div class="analytics-container">
+                            <div class="analytics-card">
+                                <h4>Timing Analysis</h4>
+                                <div id="timing-analysis">
+                                    <p>Run simulation to see timing analysis</p>
+                                </div>
+                            </div>
+                            <div class="analytics-card">
+                                <h4>Resource Utilization</h4>
+                                <div id="resource-analysis">
+                                    <p>Run simulation to see resource utilization</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="analytics-card" style="margin-top: 20px;">
+                            <h4>Fairness Analysis</h4>
+                            <div id="fairness-analysis">
+                                <p>Run simulation to see fairness metrics</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="charts-tab">
+                        <div class="chart-container" id="state-distribution-chart">
+                            <p>Run simulation to generate charts</p>
+                        </div>
+                        
+                        <div class="chart-container" id="eating-timeline-chart" style="margin-top: 30px;">
+                            <p>Run simulation to generate charts</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>Program Input/Output</h3>
+                    <div class="input-output-container">
+                        <div class="input-container">
+                            <label for="program-output">Paste Your Program Output Here</label>
+                            <textarea id="program-output" placeholder="Paste the output from your philosophers program here..."></textarea>
+                            <button id="parse-btn">Parse Output</button>
+                            <div class="error" id="parse-error"></div>
+                        </div>
+                        
+                        <div class="output-container">
+                            <label>Diagnostic Information</label>
+                            <div id="diagnostic-output" class="timeline-track">
+                                <p>Diagnostic information will appear here after parsing</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="side-panel">
+                <div class="card">
+                    <h3>Current State</h3>
+                    <div id="current-state-panel">
+                        <p>Run simulation to see current state</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>Problem Detection</h3>
+                    <div id="problem-detection">
+                        <p>Run simulation to detect potential issues</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>Getting Started</h3>
+                    <ol>
+                        <li>Set the number of philosophers and timing parameters</li>
+                        <li>Click "Setup Simulation" to prepare the visualization</li>
+                        <li>Click "Generate Run Command" to see the command to run</li>
+                        <li>Run your philo program with the displayed command</li>
+                        <li>Paste the output into the text area</li>
+                        <li>Click "Parse Output" to visualize the simulation</li>
+                    </ol>
+                </div>
+                
+                <div class="card">
+                    <h3>Example Output Format</h3>
+                    <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px; overflow: auto; font-size: 0.9em;">0 1 has taken a fork
+0 1 has taken a fork
+0 1 is eating
+200 1 is sleeping
+200 3 has taken a fork</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification"></div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const philosophersContainer = document.getElementById('philosophers-container');
+            const forksContainer = document.getElementById('forks-container');
+            const timeSlider = document.getElementById('time-slider');
+            const currentTimeDisplay = document.getElementById('current-time');
+            const programOutput = document.getElementById('program-output');
+            const parseBtn = document.getElementById('parse-btn');
+            const playBtn = document.getElementById('play-btn');
+            const pauseBtn = document.getElementById('pause-btn');
+            const restartBtn = document.getElementById('restart-btn');
+            const setupBtn = document.getElementById('setup-btn');
+            const runCommandBtn = document.getElementById('run-command-btn');
+            const generateBtn = document.getElementById('generate-btn');
+            const timelineTrack = document.getElementById('timeline-track');
+            const diagnosticOutput = document.getElementById('diagnostic-output');
+            const parseError = document.getElementById('parse-error');
+            const currentStatePanel = document.getElementById('current-state-panel');
+            const problemDetection = document.getElementById('problem-detection');
+            const deadlockWarning = document.getElementById('deadlock-warning');
+            
+            // Stats elements
+            const totalEatingEl = document.getElementById('total-eating');
+            const totalThinkingEl = document.getElementById('total-thinking');
+            const totalSleepingEl = document.getElementById('total-sleeping');
+            const totalForksEl = document.getElementById('total-forks');
+            const totalDeathsEl = document.getElementById('total-deaths');
+            const simTimeEl = document.getElementById('sim-time');
+            const philosopherStatsEl = document.getElementById('philosopher-stats');
+            
+            // Analytics elements
+            const timingAnalysisEl = document.getElementById('timing-analysis');
+            const resourceAnalysisEl = document.getElementById('resource-analysis');
+            const fairnessAnalysisEl = document.getElementById('fairness-analysis');
+            
+            // Tab navigation
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    tab.classList.add('active');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+            
+            // Global state
+            let numPhilosophers = 5;
+            let philosophers = [];
+            let forks = [];
+            let events = [];
+            let currentTime = 0;
+            let maxTime = 0;
+            let isPlaying = false;
+            let playbackInterval;
+            let lastActivityTime = 0;
+            let stateChangeTimes = {};
+            let totalStateTime = {
+                eating: 0,
+                thinking: 0,
+                sleeping: 0,
+                hungry: 0
+            };
+            let philosopherMetrics = {};
+            
+            // Simulation parameters
+            let timeToEat = 200;
+            let timeToSleep = 200;
+            let timeToDie = 800;
+            let numMustEat = 0;
+            
+            // Setup simulation environment
+            function setupSimulation() {
+                // Read parameters
+                numPhilosophers = parseInt(document.getElementById('num-philosophers').value, 10) || 5;
+                timeToDie = parseInt(document.getElementById('time-to-die').value, 10) || 800;
+                timeToEat = parseInt(document.getElementById('time-to-eat').value, 10) || 200;
+                timeToSleep = parseInt(document.getElementById('time-to-sleep').value, 10) || 200;
+                numMustEat = parseInt(document.getElementById('num-must-eat').value, 10) || 0;
+                
+                // Reset state
+                                // Reset state
+                                philosophers = [];
+                forks = [];
+                events = [];
+                currentTime = 0;
+                maxTime = 0;
+                isPlaying = false;
+                clearInterval(playbackInterval);
+                lastActivityTime = 0;
+                stateChangeTimes = {};
+                totalStateTime = {
+                    eating: 0,
+                    thinking: 0,
+                    sleeping: 0,
+                    hungry: 0
+                };
+                philosopherMetrics = {};
+                
+                // Reset UI elements
+                philosophersContainer.innerHTML = '';
+                forksContainer.innerHTML = '';
+                timelineTrack.innerHTML = '<p>Timeline events will appear here after parsing output</p>';
+                diagnosticOutput.innerHTML = '<p>Diagnostic information will appear here after parsing</p>';
+                currentStatePanel.innerHTML = '<p>Run simulation to see current state</p>';
+                problemDetection.innerHTML = '<p>Run simulation to detect potential issues</p>';
+                deadlockWarning.style.display = 'none';
+                parseError.style.display = 'none';
+                
+                // Update stats display
+                updateStatsDisplay();
+                
+                // Create philosophers and forks
+                createPhilosophersAndForks();
+                
+                // Enable generate test data button
+                generateBtn.disabled = false;
+                
+                showNotification("Simulation setup complete. Paste output or generate test data.");
+            }
+            
+            // Create philosophers and forks in a circular arrangement
+            function createPhilosophersAndForks() {
+                const centerX = 300;
+                const centerY = 300;
+                const radius = 180;
+                
+                // Create philosophers
+                for (let i = 0; i < numPhilosophers; i++) {
+                    // Calculate position on circle
+                    const angle = (i * 2 * Math.PI / numPhilosophers) - Math.PI / 2;
+                    const x = centerX + Math.cos(angle) * radius;
+                    const y = centerY + Math.sin(angle) * radius;
+                    
+                    // Create philosopher element
+                    const philosopher = document.createElement('div');
+                    philosopher.className = 'philosopher thinking';
+                    philosopher.style.left = `${x - 35}px`;  // Center the element
+                    philosopher.style.top = `${y - 35}px`;  // Center the element
+                    philosopher.innerHTML = i + 1;
+                    philosopher.setAttribute('data-id', i + 1);
+                    philosophersContainer.appendChild(philosopher);
+                    
+                    // Store philosopher data
+                    philosophers.push({
+                        id: i + 1,
+                        element: philosopher,
+                        state: 'thinking',
+                        x: x,
+                        y: y,
+                        eatingCount: 0,
+                        thinkingCount: 0,
+                        sleepingCount: 0,
+                        forksTakenCount: 0,
+                        lastMealTime: 0,
+                        isAlive: true
+                    });
+                    
+                    // Initialize metrics for this philosopher
+                    philosopherMetrics[i + 1] = {
+                        eating: 0,
+                        thinking: 0,
+                        sleeping: 0,
+                        hungry: 0,
+                        totalTimeEating: 0,
+                        totalTimeThinking: 0,
+                        totalTimeSleeping: 0,
+                        totalTimeHungry: 0,
+                        lastStateChange: 0,
+                        currentState: 'thinking',
+                        mealCount: 0,
+                        longestWaitForFork: 0
+                    };
+                }
+                
+                // Create forks
+                for (let i = 0; i < numPhilosophers; i++) {
+                    // Position fork between philosophers
+                    const leftPhiloIdx = i;
+                    const rightPhiloIdx = (i + 1) % numPhilosophers;
+                    
+                    const leftPhilo = philosophers[leftPhiloIdx];
+                    const rightPhilo = philosophers[rightPhiloIdx];
+                    
+                    // Calculate midpoint position
+                    const midAngle = ((i + 0.5) * 2 * Math.PI / numPhilosophers) - Math.PI / 2;
+                    const midX = centerX + Math.cos(midAngle) * (radius - 40);
+                    const midY = centerY + Math.sin(midAngle) * (radius - 40);
+                    
+                    // Create fork element
+                    const fork = document.createElement('div');
+                    fork.className = 'fork';
+                    fork.style.left = `${midX - 25}px`;  // Center the element
+                    fork.style.top = `${midY - 5}px`;  // Center the element
+                    
+                    // Rotate the fork to point outward
+                    fork.style.transform = `rotate(${midAngle + Math.PI/2}rad)`;
+                    
+                    forksContainer.appendChild(fork);
+                    
+                    // Store fork data
+                    forks.push({
+                        id: i + 1,
+                        element: fork,
+                        x: midX,
+                        y: midY,
+                        taken: false,
+                        takenBy: null,
+                        leftPhilosopher: leftPhiloIdx + 1,
+                        rightPhilosopher: rightPhiloIdx + 1
+                    });
+                }
+            }
+            
+            // Parse program output
+            function parseOutput() {
+                const output = programOutput.value.trim();
+                
+                if (!output) {
+                    showError("Please paste program output first.");
+                    return false;
+                }
+                
+                events = [];
+                let errorInParsing = false;
+                
+                // Split output into lines
+                const lines = output.split('\n');
+                
+                // Track which philosophers we've seen
+                const seenPhilosophers = new Set();
+                
+                // Parse each line
+                for (const line of lines) {
+                    // Expected format: [timestamp] [philosopher_id] [action]
+                    const match = line.match(/^(\d+)\s+(\d+)\s+(.+)$/);
+                    
+                    if (match) {
+                        const timestamp = parseInt(match[1], 10);
+                        const philosopherId = parseInt(match[2], 10);
+                        const action = match[3].trim();
+                        
+                        seenPhilosophers.add(philosopherId);
+                        
+                        events.push({
+                            timestamp,
+                            philosopherId,
+                            action
+                        });
+                        
+                        // Update max timestamp
+                        if (timestamp > maxTime) {
+                            maxTime = timestamp;
+                        }
+                    } else if (line.trim().length > 0) {
+                        // Skip empty lines, but report non-matching lines
+                        diagnosticOutput.innerHTML += `<p>Warning: Couldn't parse line: "${line}"</p>`;
+                        errorInParsing = true;
+                    }
+                }
+                
+                // Sort events by timestamp
+                events.sort((a, b) => a.timestamp - b.timestamp);
+                
+                // Verify if number of philosophers matches
+                if (seenPhilosophers.size !== numPhilosophers) {
+                    showError(`Warning: Expected ${numPhilosophers} philosophers, but found ${seenPhilosophers.size} in output.`);
+                    numPhilosophers = seenPhilosophers.size;
+                    
+                    // Recreate philosophers with correct count
+                    setupSimulation();
+                }
+                
+                // Update timeline slider
+                timeSlider.max = maxTime;
+                timeSlider.value = 0;
+                currentTimeDisplay.textContent = '0 ms';
+                
+                // Generate timeline events
+                generateTimeline();
+                
+                // Run initial diagnostics
+                runDiagnostics();
+                
+                // Show notification
+                if (errorInParsing) {
+                    showNotification("Output parsed with some errors. Check diagnostic information.");
+                } else {
+                    showNotification("Output parsed successfully. Press play to start visualization.");
+                }
+                
+                return true;
+            }
+            
+            // Generate timeline from events
+            function generateTimeline() {
+                timelineTrack.innerHTML = '';
+                
+                events.forEach(event => {
+                    const eventEl = document.createElement('div');
+                    let className = '';
+                    
+                    // Set class based on action
+                    if (event.action === 'is eating') className = 'eating';
+                    else if (event.action === 'is sleeping') className = 'sleeping';
+                    else if (event.action === 'is thinking') className = 'thinking';
+                    else if (event.action.includes('taken a fork')) className = 'fork';
+                    else if (event.action.includes('died')) className = 'dead';
+                    
+                    eventEl.className = `timeline-event ${className}`;
+                    eventEl.textContent = `${event.timestamp}ms: Philosopher ${event.philosopherId} ${event.action}`;
+                    eventEl.addEventListener('click', () => {
+                        // Jump to this event's time
+                        pauseSimulation();
+                        currentTime = event.timestamp;
+                        timeSlider.value = currentTime;
+                        currentTimeDisplay.textContent = `${currentTime} ms`;
+                        updateUIAtTime(currentTime);
+                    });
+                    
+                    timelineTrack.appendChild(eventEl);
+                });
+            }
+            
+            // Run diagnostics on the events
+            function runDiagnostics() {
+                diagnosticOutput.innerHTML = '';
+                let diagnosticText = '';
+                
+                // Check for deaths
+                const deaths = events.filter(e => e.action.includes('died'));
+                if (deaths.length > 0) {
+                    diagnosticText += `<p class="timeline-event dead">⚠️ ${deaths.length} philosopher(s) died during simulation.</p>`;
+                    
+                    deaths.forEach(death => {
+                        diagnosticText += `<p>Philosopher ${death.philosopherId} died at ${death.timestamp}ms</p>`;
+                    });
+                } else {
+                    diagnosticText += `<p>✓ No philosophers died during simulation.</p>`;
+                }
+                
+                // Check for potential deadlocks
+                const activityGaps = findLongActivityGaps();
+                if (activityGaps.length > 0) {
+                    diagnosticText += `<p class="timeline-event fork">⚠️ Potential deadlock detected:</p>`;
+                    
+                    activityGaps.forEach(gap => {
+                        diagnosticText += `<p>No activity for ${gap.duration}ms from ${gap.start}ms to ${gap.end}ms</p>`;
+                    });
+                } else {
+                    diagnosticText += `<p>✓ No potential deadlocks detected.</p>`;
+                }
+                
+                // Check eating fairness
+                const eatingCounts = {};
+                for (let i = 1; i <= numPhilosophers; i++) {
+                    eatingCounts[i] = events.filter(e => e.philosopherId === i && e.action === 'is eating').length;
+                }
+                
+                const minEating = Math.min(...Object.values(eatingCounts));
+                const maxEating = Math.max(...Object.values(eatingCounts));
+                
+                if (maxEating - minEating > 2) {
+                    diagnosticText += `<p class="timeline-event eating">⚠️ Potential fairness issue: Some philosophers eat significantly more than others.</p>`;
+                } else {
+                    diagnosticText += `<p>✓ Resource allocation appears fairly balanced.</p>`;
+                }
+                
+                // Check timing constraints
+                let timingViolations = false;
+                let previousEating = {};
+                
+                for (const event of events) {
+                    if (event.action === 'is eating') {
+                        if (previousEating[event.philosopherId]) {
+                            const gap = event.timestamp - previousEating[event.philosopherId];
+                            if (gap < timeToEat + timeToSleep) {
+                                diagnosticText += `<p class="timeline-event eating">⚠️ Timing violation: Philosopher ${event.philosopherId} started eating again after only ${gap}ms (expected minimum: ${timeToEat + timeToSleep}ms)</p>`;
+                                timingViolations = true;
+                            }
+                        }
+                        previousEating[event.philosopherId] = event.timestamp;
+                    }
+                }
+                
+                if (!timingViolations) {
+                    diagnosticText += `<p>✓ All timing constraints appear to be respected.</p>`;
+                }
+                
+                // Calculate statistics for problem detection
+                updateProblemDetection();
+                
+                diagnosticOutput.innerHTML = diagnosticText;
+            }
+            
+            // Find gaps in activity that might indicate deadlocks
+            function findLongActivityGaps() {
+                const gaps = [];
+                let lastActivityTime = 0;
+                
+                for (let i = 0; i < events.length; i++) {
+                    const event = events[i];
+                    const gap = event.timestamp - lastActivityTime;
+                    
+                    if (gap > 1000 && lastActivityTime > 0) {  // Ignore initial gap
+                        gaps.push({
+                            start: lastActivityTime,
+                            end: event.timestamp,
+                            duration: gap
+                        });
+                    }
+                    
+                    lastActivityTime = event.timestamp;
+                }
+                
+                return gaps;
+            }
+            
+            // Update UI based on current time
+            function updateUIAtTime(time) {
+                // Reset all states
+                for (const philosopher of philosophers) {
+                    philosopher.element.className = 'philosopher thinking';
+                    philosopher.state = 'thinking';
+                }
+                
+                for (const fork of forks) {
+                    fork.element.className = 'fork';
+                    fork.taken = false;
+                    fork.takenBy = null;
+                }
+                
+                // Apply all events up to current time
+                const relevantEvents = events.filter(e => e.timestamp <= time);
+                
+                for (const event of relevantEvents) {
+                    const philosopher = philosophers.find(p => p.id === event.philosopherId);
+                    
+                    if (!philosopher) continue;
+                    
+                    // Update state based on action
+                    if (event.action === 'is eating') {
+                        philosopher.state = 'eating';
+                        philosopher.element.className = 'philosopher eating';
+                        philosopher.eatingCount++;
+                        philosopher.lastMealTime = event.timestamp;
+                        
+                        // Take both adjacent forks
+                        const leftForkId = event.philosopherId;
+                        const rightForkId = event.philosopherId === 1 ? numPhilosophers : event.philosopherId - 1;
+                        
+                        const leftFork = forks.find(f => f.id === leftForkId);
+                        const rightFork = forks.find(f => f.id === rightForkId);
+                        
+                        if (leftFork) {
+                            leftFork.taken = true;
+                            leftFork.takenBy = event.philosopherId;
+                            leftFork.element.className = 'fork taken';
+                        }
+                        
+                        if (rightFork) {
+                            rightFork.taken = true;
+                            rightFork.takenBy = event.philosopherId;
+                            rightFork.element.className = 'fork taken';
+                        }
+                    } else if (event.action === 'is sleeping') {
+                        philosopher.state = 'sleeping';
+                        philosopher.element.className = 'philosopher sleeping';
+                        philosopher.sleepingCount++;
+                    } else if (event.action === 'is thinking') {
+                        philosopher.state = 'thinking';
+                        philosopher.element.className = 'philosopher thinking';
+                        philosopher.thinkingCount++;
+                    } else if (event.action.includes('taken a fork')) {
+                        philosopher.state = 'hungry';
+                        philosopher.element.className = 'philosopher hungry';
+                        philosopher.forksTakenCount++;
+                        
+                        // Find an available adjacent fork to take
+                        const adjacentForks = forks.filter(f => 
+                            (f.leftPhilosopher === philosopher.id || f.rightPhilosopher === philosopher.id) && !f.taken
+                        );
+                        
+                        if (adjacentForks.length > 0) {
+                            const fork = adjacentForks[0];
+                            fork.taken = true;
+                            fork.takenBy = philosopher.id;
+                            fork.element.className = 'fork taken';
+                        }
+                    } else if (event.action.includes('died')) {
+                        philosopher.state = 'dead';
+                        philosopher.element.className = 'philosopher dead';
+                        philosopher.isAlive = false;
+                    }
+                }
+                
+                // Update current state panel
+                updateCurrentStatePanel(time);
+                
+                // Check for potential starvation at current time
+                checkStarvation(time);
+            }
+            
+            // Update the current state panel
+            function updateCurrentStatePanel(time) {
+                let stateText = `<h4>Current Time: ${time} ms</h4>`;
+                stateText += '<table>';
+                stateText += '<tr><th>Philosopher</th><th>State</th><th>Last Meal</th><th>Hunger</th></tr>';
+                
+                for (const philosopher of philosophers) {
+                    const lastMeal = philosopher.lastMealTime || 0;
+                    const timeSinceLastMeal = time - lastMeal;
+                    let hungerLevel = 'Low';
+                    let hungerColor = 'green';
+                    
+                    if (timeSinceLastMeal > timeToDie * 0.7) {
+                        hungerLevel = 'Critical';
+                        hungerColor = 'red';
+                    } else if (timeSinceLastMeal > timeToDie * 0.5) {
+                        hungerLevel = 'High';
+                        hungerColor = 'orange';
+                    } else if (timeSinceLastMeal > timeToDie * 0.3) {
+                        hungerLevel = 'Medium';
+                        hungerColor = 'yellow';
+                    }
+                    
+                    stateText += `<tr>
+                        <td>Philosopher ${philosopher.id}</td>
+                        <td><span class="${philosopher.state}">${philosopher.state}</span></td>
+                        <td>${lastMeal} ms</td>
+                        <td><span style="color:${hungerColor};">${hungerLevel} (${timeSinceLastMeal} ms)</span></td>
+                    </tr>`;
+                }
+                
+                stateText += '</table>';
+                
+                // Add fork status
+                stateText += '<h4 style="margin-top:15px;">Fork Status</h4>';
+                stateText += '<table>';
+                stateText += '<tr><th>Fork</th><th>Status</th></tr>';
+                
+                for (const fork of forks) {
+                    stateText += `<tr>
+                        <td>Fork ${fork.id}</td>
+                        <td>${fork.taken ? `Taken by Philosopher ${fork.takenBy}` : 'Free'}</td>
+                    </tr>`;
+                }
+                
+                stateText += '</table>';
+                
+                currentStatePanel.innerHTML = stateText;
+            }
+            
+            // Check for potential starvation
+            function checkStarvation(time) {
+                let deadlockRisk = false;
+                
+                // Check if any philosopher is at risk of starvation
+                for (const philosopher of philosophers) {
+                    if (philosopher.isAlive && time - philosopher.lastMealTime > timeToDie * 0.8) {
+                        deadlockRisk = true;
+                    }
+                }
+                
+                // Check if activity has stalled
+                const recentEvents = events.filter(e => e.timestamp <= time && e.timestamp > time - 500);
+                if (recentEvents.length === 0 && time > 500) {
+                    deadlockRisk = true;
+                }
+                
+                deadlockWarning.style.display = deadlockRisk ? 'block' : 'none';
+            }
+            
+            // Update problem detection panel
+            function updateProblemDetection() {
+                let problemText = '';
+                const stateDistribution = {};
+                let totalStateChanges = 0;
+                const mealCounts = {};
+                let forkUsage = {};
+                
+                // Initialize counters
+                for (let i = 1; i <= numPhilosophers; i++) {
+                    mealCounts[i] = 0;
+                    forkUsage[i] = 0;
+                }
+                
+                // Count state changes
+                events.forEach(event => {
+                    if (event.action === 'is eating') {
+                        mealCounts[event.philosopherId]++;
+                        totalStateChanges++;
+                        stateDistribution.eating = (stateDistribution.eating || 0) + 1;
+                    } else if (event.action === 'is sleeping') {
+                        totalStateChanges++;
+                        stateDistribution.sleeping = (stateDistribution.sleeping || 0) + 1;
+                    } else if (event.action === 'is thinking') {
+                        totalStateChanges++;
+                        stateDistribution.thinking = (stateDistribution.thinking || 0) + 1;
+                    } else if (event.action.includes('taken a fork')) {
+                        forkUsage[event.philosopherId]++;
+                        stateDistribution.hungry = (stateDistribution.hungry || 0) + 1;
+                    }
+                });
+                
+                // Check for problems
+                
+                // 1. Check for uneven distribution of meals
+                const mealValues = Object.values(mealCounts);
+                const avgMeals = mealValues.reduce((a, b) => a + b, 0) / mealValues.length;
+                const maxDeviation = Math.max(...mealValues.map(m => Math.abs(m - avgMeals)));
+                
+                if (maxDeviation > 2) {
+                    problemText += '<p>⚠️ <strong>Fairness issue detected:</strong> Some philosophers eat more frequently than others.</p>';
+                    
+                    problemText += '<ul>';
+                    for (const [id, count] of Object.entries(mealCounts)) {
+                        const deviation = count - avgMeals;
+                        const devPercent = Math.abs(deviation / avgMeals * 100).toFixed(1);
+                        
+                        if (Math.abs(deviation) > 1) {
+                            problemText += `<li>Philosopher ${id}: ${count} meals (${deviation > 0 ? '+' : ''}${deviation.toFixed(1)}, ${devPercent}% from average)</li>`;
+                        }
+                    }
+                    problemText += '</ul>';
+                } else {
+                    problemText += '<p>✓ <strong>Fair resource distribution:</strong> All philosophers have similar eating opportunities.</p>';
+                }
+                
+                // 2. Check for long gaps between events (potential deadlocks)
+                const activityGaps = findLongActivityGaps();
+                if (activityGaps.length > 0) {
+                    problemText += '<p>⚠️ <strong>Potential deadlock detected:</strong> Long periods without activity.</p>';
+                    
+                    problemText += '<ul>';
+                    activityGaps.forEach(gap => {
+                        problemText += `<li>No activity for ${gap.duration}ms (${gap.start}ms - ${gap.end}ms)</li>`;
+                    });
+                    problemText += '</ul>';
+                }
+                
+                // 3. Check if any philosophers have died
+                const deaths = events.filter(e => e.action.includes('died'));
+                if (deaths.length > 0) {
+                    problemText += '<p>⚠️ <strong>Starvation detected:</strong> One or more philosophers died during simulation.</p>';
+                    
+                    problemText += '<ul>';
+                    deaths.forEach(death => {
+                        problemText += `<li>Philosopher ${death.philosopherId} died at ${death.timestamp}ms</li>`;
+                    });
+                    problemText += '</ul>';
+                }
+                
+                if (problemText === '') {
+                    problemText = '<p>✓ No significant issues detected in the simulation.</p>';
+                }
+                
+                problemDetection.innerHTML = problemText;
+            }
+            
+            // Update statistics display
+            function updateStatsDisplay() {
+                // Calculate statistics
+                const eatingEvents = events.filter(e => e.action === 'is eating').length;
+                const thinkingEvents = events.filter(e => e.action === 'is thinking').length;
+                const sleepingEvents = events.filter(e => e.action === 'is sleeping').length;
+                const forkEvents = events.filter(e => e.action.includes('taken a fork')).length;
+                const deathEvents = events.filter(e => e.action.includes('died')).length;
+                
+                // Update stat cards
+                totalEatingEl.textContent = eatingEvents;
+                totalThinkingEl.textContent = thinkingEvents;
+                totalSleepingEl.textContent = sleepingEvents;
+                totalForksEl.textContent = forkEvents;
+                totalDeathsEl.textContent = deathEvents;
+                simTimeEl.textContent = maxTime;
+                
+                // Build per-philosopher stats
+                let statsHtml = '<table>';
+                statsHtml += '<tr><th>Philosopher</th><th>Eating</th><th>Thinking</th><th>Sleeping</th><th>Forks Taken</th></tr>';
+                
+                for (const philosopher of philosophers) {
+                    statsHtml += `<tr>
+                        <td>Philosopher ${philosopher.id}</td>
+                        <td>${philosopher.eatingCount}</td>
+                        <td>${philosopher.thinkingCount}</td>
+                        <td>${philosopher.sleepingCount}</td>
+                        <td>${philosopher.forksTakenCount}</td>
+                    </tr>`;
+                }
+                
+                statsHtml += '</table>';
+                
+                // Add state distribution chart
+                statsHtml += '<h4 style="margin-top:20px;">State Distribution</h4>';
+                statsHtml += '<div style="display:flex; margin-top:10px;">';
+                
+                const stateDistribution = {
+                    eating: eatingEvents,
+                    thinking: thinkingEvents,
+                    sleeping: sleepingEvents,
+                    hungry: forkEvents
+                };
+                
+                const totalStates = eatingEvents + thinkingEvents + sleepingEvents + forkEvents;
+                
+                for (const [state, count] of Object.entries(stateDistribution)) {
+                    const percentage = totalStates > 0 ? (count / totalStates * 100).toFixed(1) : 0;
+                    statsHtml += `<div style="flex:1; padding:0 5px;">
+                        <div>${state} (${percentage}%)</div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar ${state}" style="width:${percentage}%"></div>
+                        </div>
+                    </div>`;
+                }
+                
+                statsHtml += '</div>';
+                
+                philosopherStatsEl.innerHTML = statsHtml;
+            }
+            
+            // Playback controls
+            function playSimulation() {
+                isPlaying = true;
+                clearInterval(playbackInterval);
+                
+                playbackInterval = setInterval(() => {
+                    currentTime += 5;
+                    
+                    if (currentTime >= maxTime) {
+                        currentTime = maxTime;
+                        pauseSimulation();
+                    }
+                    
+                    timeSlider.value = currentTime;
+                    currentTimeDisplay.textContent = `${currentTime} ms`;
+                    updateUIAtTime(currentTime);
+                }, 100);
+            }
+            
+            function pauseSimulation() {
+                isPlaying = false;
+                clearInterval(playbackInterval);
+            }
+            
+            function restartSimulation() {
+                currentTime = 0;
+                timeSlider.value = 0;
+                currentTimeDisplay.textContent = '0 ms';
+                
+                pauseSimulation();
+                updateUIAtTime(0);
+            }
+            
+            // Show notification
+            function showNotification(message, type = 'info') {
+                const notification = document.getElementById('notification');
+                
+                notification.textContent = message;
+                notification.style.display = 'block';
+                
+                // Set color based on type
+                if (type === 'error') {
+                    notification.style.borderLeftColor = 'var(--dead-color)';
+                } else {
+                    notification.style.borderLeftColor = 'var(--primary-color)';
+                }
+                
+                // Auto-hide after 5 seconds
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 5000);
+            }
+            
+            // Show error in error box
+            function showError(message) {
+                parseError.textContent = message;
+                parseError.style.display = 'block';
+                
+                // Also show notification
+                showNotification(message, 'error');
+            }
+            
+            // Generate synthetic test data
+            function generateTestData() {
+                let output = '';
+                let currentTime = 0;
+                const philosopherStates = {};
+                
+                // Initialize philosophers as thinking
+                for (let i = 1; i <= numPhilosophers; i++) {
+                    philosopherStates[i] = {
+                        state: 'thinking',
+                        forks: 0,
+                        lastMeal: -Infinity
+                    };
+                }
+                
+                // Simulation parameters
+                const simulationTime = 5000;
+                
+                while (currentTime < simulationTime) {
+                    // For each philosopher
+                    for (let i = 1; i <= numPhilosophers; i++) {
+                        const philosopher = philosopherStates[i];
+                        
+                        // Check if a philosopher can take forks
+                        if (philosopher.state === 'thinking') {
+                            // Try to take forks (50% chance)
+                            if (Math.random() > 0.5) {
+                                output += `${currentTime} ${i} has taken a fork\n`;
+                                philosopher.forks = 1;
+                                philosopher.state = 'hungry';
+                                
+                                // Sometimes also take second fork immediately
+                                if (Math.random() > 0.5) {
+                                    output += `${currentTime} ${i} has taken a fork\n`;
+                                    philosopher.forks = 2;
+                                    output += `${currentTime} ${i} is eating\n`;
+                                    philosopher.state = 'eating';
+                                    philosopher.lastMeal = currentTime;
+                                }
+                            }
+                        } 
+                        // Check if a philosopher with one fork can take another
+                        else if (philosopher.state === 'hungry' && philosopher.forks === 1) {
+                            if (Math.random() > 0.7) {
+                                output += `${currentTime} ${i} has taken a fork\n`;
+                                philosopher.forks = 2;
+                                output += `${currentTime} ${i} is eating\n`;
+                                philosopher.state = 'eating';
+                                philosopher.lastMeal = currentTime;
+                            }
+                        }
+                        // Check if a philosopher is done eating
+                        else if (philosopher.state === 'eating' && currentTime >= philosopher.lastMeal + timeToEat) {
+                            output += `${currentTime} ${i} is sleeping\n`;
+                            philosopher.state = 'sleeping';
+                            philosopher.forks = 0;
+                        }
+                        // Check if a philosopher is done sleeping
+                        else if (philosopher.state === 'sleeping' && currentTime >= philosopher.lastMeal + timeToEat + timeToSleep) {
+                            output += `${currentTime} ${i} is thinking\n`;
+                            philosopher.state = 'thinking';
+                        }
+                        
+                        // Check if a philosopher would die
+                        if (currentTime - philosopher.lastMeal > timeToDie && philosopher.state !== 'eating' && currentTime > 0) {
+                            output += `${currentTime} ${i} died\n`;
+                            break; // End simulation when a philosopher dies
+                        }
+                    }
+                    
+                    // Increment time
+                    currentTime += Math.floor(Math.random() * 50) + 50; // Random time increment
+                }
+                
+                programOutput.value = output;
+                showNotification("Test data generated. Click 'Parse Output' to visualize.");
+            }
+            
+            // Initialize timing analysis
+            function updateTimingAnalysis() {
+                if (events.length === 0) return;
+                
+                let html = '<table>';
+                html += '<tr><th>Metric</th><th>Value</th><th>Expectation</th><th>Status</th></tr>';
+                
+                // Calculate average time between meals
+                const mealTimes = {};
+                const mealGaps = {};
+                
+                for (const event of events) {
+                    if (event.action === 'is eating') {
+                        const philoId = event.philosopherId;
+                        
+                        if (mealTimes[philoId]) {
+                            const gap = event.timestamp - mealTimes[philoId];
+                            if (!mealGaps[philoId]) mealGaps[philoId] = [];
+                            mealGaps[philoId].push(gap);
+                        }
+                        
+                        mealTimes[philoId] = event.timestamp;
+                    }
+                }
+                
+                // Calculate average meal gap
+                let totalGaps = 0;
+                let gapCount = 0;
+                
+                for (const gaps of Object.values(mealGaps)) {
+                    for (const gap of gaps) {
+                        totalGaps += gap;
+                        gapCount++;
+                    }
+                }
+                
+                const avgMealGap = gapCount > 0 ? totalGaps / gapCount : 0;
+                const expectedMealGap = timeToEat + timeToSleep + 100; // Adding some buffer
+                const mealGapStatus = avgMealGap >= expectedMealGap ? '✓' : '⚠️';
+                
+                html += `<tr>
+                    <td>Average time between meals</td>
+                    <td>${avgMealGap.toFixed(1)} ms</td>
+                    <td>≥ ${expectedMealGap} ms</td>
+                    <td>${mealGapStatus}</td>
+                </tr>`;
+                
+                // Calculate eating duration
+                let totalEatingTime = 0;
+                const eatingEvents = events.filter(e => e.action === 'is eating');
+                const sleepingEvents = events.filter(e => e.action === 'is sleeping');
+                
+                for (let i = 0; i < eatingEvents.length; i++) {
+                    const eat = eatingEvents[i];
+                    // Find the corresponding sleep event
+                    const sleep = sleepingEvents.find(s => 
+                        s.philosopherId === eat.philosopherId && 
+                        s.timestamp > eat.timestamp &&
+                        !eatingEvents.some(e => 
+                            e.philosopherId === eat.philosopherId && 
+                            e.timestamp > eat.timestamp && 
+                            e.timestamp < s.timestamp
+                        )
+                    );
+                    
+                    if (sleep) {
+                        totalEatingTime += sleep.timestamp - eat.timestamp;
+                    }
+                }
+                
+                const avgEatingTime = eatingEvents.length > 0 ? totalEatingTime / eatingEvents.length : 0;
+                const eatingTimeStatus = Math.abs(avgEatingTime - timeToEat) < 50 ? '✓' : '⚠️';
+                
+                html += `<tr>
+                    <td>Average eating duration</td>
+                    <td>${avgEatingTime.toFixed(1)} ms</td>
+                    <td>${timeToEat} ms</td>
+                    <td>${eatingTimeStatus}</td>
+                </tr>`;
+                
+                // Check if any philosophers died
+                const deaths = events.filter(e => e.action.includes('died')).length;
+                const deathStatus = deaths === 0 ? '✓' : '⚠️';
+                
+                html += `<tr>
+                    <td>Philosopher deaths</td>
+                    <td>${deaths}</td>
+                    <td>0</td>
+                    <td>${deathStatus}</td>
+                </tr>`;
+                
+                html += '</table>';
+                
+                timingAnalysisEl.innerHTML = html;
+            }
+            
+            // Update resource utilization
+            function updateResourceAnalysis() {
+                if (events.length === 0) return;
+                
+                // Calculate fork usage
+                const forkUsage = {};
+                let totalForkTime = 0;
+                
+                // Initialize fork usage counters
+                for (let i = 1; i <= numPhilosophers; i++) {
+                    forkUsage[i] = 0;
+                }
+                
+                // Count fork takes per philosopher
+                for (const event of events) {
+                    if (event.action.includes('taken a fork')) {
+                        forkUsage[event.philosopherId]++;
+                    }
+                }
+                
+                // Calculate the time forks are used
+                let eatingTime = 0;
+                for (const event of events.filter(e => e.action === 'is eating')) {
+                    eatingTime += timeToEat; // Assume each eating takes the full time
+                }
+                
+                const totalSimTime = maxTime;
+                const forkUtilization = totalSimTime > 0 ? (eatingTime / (totalSimTime * numPhilosophers)) * 100 : 0;
+                
+                let html = `<p><strong>Fork Utilization:</strong> ${forkUtilization.toFixed(1)}%</p>`;
+                
+                // Create a table showing fork usage by philosopher
+                html += '<table>';
+                html += '<tr><th>Philosopher</th><th>Fork Takes</th><th>Utilization</th></tr>';
+                
+                for (let i = 1; i <= numPhilosophers; i++) {
+                    const philoEatingEvents = events.filter(e => e.philosopherId === i && e.action === 'is eating').length;
+                    const philoForkTakes = forkUsage[i];
+                    const utilization = philoEatingEvents > 0 ? (philoEatingEvents * timeToEat / maxTime) * 100 : 0;
+                    
+                    html += `<tr>
+                        <td>Philosopher ${i}</td>
+                        <td>${philoForkTakes}</td>
+                        <td>${utilization.toFixed(1)}%</td>
+                    </tr>`;
+                }
+                
+                html += '</table>';
+                
+                resourceAnalysisEl.innerHTML = html;
+            }
+            
+            // Update fairness metrics
+            function updateFairnessAnalysis() {
+                if (events.length === 0) return;
+                
+                // Count eating events per philosopher
+                const mealCounts = {};
+                for (let i = 1; i <= numPhilosophers; i++) {
+                    mealCounts[i] = events.filter(e => e.philosopherId === i && e.action === 'is eating').length;
+                }
+                
+                // Calculate statistics
+                const meals = Object.values(mealCounts);
+                const totalMeals = meals.reduce((sum, count) => sum + count, 0);
+                const avgMeals = totalMeals / numPhilosophers;
+                const minMeals = Math.min(...meals);
+                const maxMeals = Math.max(...meals);
+                const mealRange = maxMeals - minMeals;
+                
+                // Calculate standard deviation
+                const variance = meals.reduce((sum, count) => sum + Math.pow(count - avgMeals, 2), 0) / numPhilosophers;
+                const stdDev = Math.sqrt(variance);
+                
+                // Calculate fairness index (Jain's fairness index)
+                const sumSquared = Math.pow(meals.reduce((sum, count) => sum + count, 0), 2);
+                const sumOfSquares = meals.reduce((sum, count) => sum + Math.pow(count, 2), 0);
+                const fairnessIndex = sumOfSquares > 0 ? sumSquared / (numPhilosophers * sumOfSquares) : 0;
+                
+                let html = '<h4>Meal Distribution</h4>';
+                html += `<p><strong>Average meals per philosopher:</strong> ${avgMeals.toFixed(2)}</p>`;
+                html += `<p><strong>Range (max-min):</strong> ${mealRange} meals</p>`;
+                html += `<p><strong>Standard deviation:</strong> ${stdDev.toFixed(2)} meals</p>`;
+                html += `<p><strong>Fairness index:</strong> ${(fairnessIndex * 100).toFixed(1)}% (100% = perfectly fair)</p>`;
+                
+                // Add a visualization of meal distribution
+                html += '<div class="meal-distribution">';
+                html += '<table>';
+                html += '<tr><th>Philosopher</th><th>Meals</th><th>Distribution</th></tr>';
+                
+                for (let i = 1; i <= numPhilosophers; i++) {
+                    const count = mealCounts[i];
+                    const percentage = avgMeals > 0 ? (count / avgMeals) * 100 : 0;
+                    
+                    html += `<tr>
+                        <td>Philosopher ${i}</td>
+                        <td>${count}</td>
+                        <td>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar eating" style="width: ${percentage}%"></div>
+                            </div>
+                        </td>
+                    </tr>`;
+                }
+                
+                html += '</table>';
+                html += '</div>';
+                
+                fairnessAnalysisEl.innerHTML = html;
+            }
+            
+            // Event listeners
+            setupBtn.addEventListener('click', setupSimulation);
+            
+            runCommandBtn.addEventListener('click', function() {
+                const numPhilos = document.getElementById('num-philosophers').value;
+                const timeToDie = document.getElementById('time-to-die').value;
+                const timeToEat = document.getElementById('time-to-eat').value;
+                const timeToSleep = document.getElementById('time-to-sleep').value;
+                const numMustEat = document.getElementById('num-must-eat').value;
+                
+                let command = `./philo ${numPhilos} ${timeToDie} ${timeToEat} ${timeToSleep}`;
+                if (numMustEat > 0) {
+                    command += ` ${numMustEat}`;
+                }
+                
+                showNotification(`Run this command: ${command}`);
+                
+                // Copy to clipboard
+                navigator.clipboard.writeText(command).catch(e => console.warn('Could not copy to clipboard:', e));
+                
+                alert(`Run this command in your terminal:\n${command}\n\nThis command has been copied to your clipboard.`);
+            });
+            
+            generateBtn.addEventListener('click', generateTestData);
+            
+            parseBtn.addEventListener('click', function() {
+                if (parseOutput()) {
+                    // Update statistics and analytics
+                    updateStatsDisplay();
+                    updateTimingAnalysis();
+                    updateResourceAnalysis();
+                    updateFairnessAnalysis();
+                }
+            });
+            
+            playBtn.addEventListener('click', playSimulation);
+            pauseBtn.addEventListener('click', pauseSimulation);
+            restartBtn.addEventListener('click', restartSimulation);
+            
+            timeSlider.addEventListener('input', function() {
+                currentTime = parseInt(this.value, 10);
+                currentTimeDisplay.textContent = `${currentTime} ms`;
+                pauseSimulation();
+                updateUIAtTime(currentTime);
+            });
+            
+            // Initialize the simulation
+            setupSimulation();
+        });
+    </script>
+</body>
+</html>
