@@ -1,22 +1,18 @@
 #include "philosophers.h"
 
-long long	get_current_time(void)
+long	get_time(void)
 {
-	struct timeval	tp;
-	long long		milliseconds;
+	struct timeval	tv;
 
-	gettimeofday(&tp, NULL);
-	milliseconds = tp.tv_sec * 1000;
-	milliseconds += tp.tv_usec / 1000;
-	return (milliseconds);
+	gettimeofday(&tv, NULL);
+	return (tv.tv_sec * 1000 + tv.tv_usec / 1000);
 }
 
-int	ft_usleep(size_t milliseconds)
+void	ft_usleep(long time_in_ms)
 {
-	size_t	start;
+	long	start;
 
-	start = get_current_time();
-	while ((get_current_time() - start) < milliseconds)
-		usleep(500);
-	return (0);
+	start = get_time();
+	while ((get_time() - start) < time_in_ms)
+		usleep(100);
 }

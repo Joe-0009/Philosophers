@@ -48,11 +48,11 @@ static int	create_threads(t_program *program)
 {
 	int	i;
 
-	program->start_time = get_current_time();
+	program->start_time = get_time();
 	i = 0;
 	while (i < program->number_of_philosophers)
 	{
-		program->philosophers[i].last_meal = get_current_time();
+		program->philosophers[i].last_meal = get_time();
 		if (pthread_create(&program->threads[i], NULL, philosopher_routine,
 				&program->philosophers[i]))
 			return (1);
@@ -112,4 +112,3 @@ void	clean_program(t_program *program)
 		free(program->philosophers);
 	}
 }
-

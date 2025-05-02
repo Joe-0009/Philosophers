@@ -36,28 +36,29 @@ typedef struct s_program
 }						t_program;
 
 /* time functions */
-long long	get_current_time(void);
-int			ft_usleep(size_t milliseconds);
+long					get_time(void);
+void					ft_usleep(long time_in_ms);
 
 /* utility functions */
-void		print_status(t_philosopher *philo, char *status);
-void		ft_putstr(char *str);
-int			is_someone_dead(t_program *prog);
+void					print_status(t_philosopher *philo, char *status);
+void					ft_putstr(char *str);
+int						is_someone_dead(t_program *prog);
 
 /* initialization functions */
-int			check_args(int ac, char **av);
-int			init_program_args(t_program *program, int ac, char **av);
-int			init_program(t_program *program);
-int			init_mutexes(t_program *program);
-void		init_philosophers(t_program *program);
+int						check_args(int ac, char **av);
+int						init_program_args(t_program *program, int ac,
+							char **av);
+int						init_program(t_program *program);
+int						init_mutexes(t_program *program);
+void					init_philosophers(t_program *program);
 
 /* philosopher actions */
-int		eat(t_philosopher *philo);
-int		sleep_think_actions(t_philosopher *philo);
-int			death_check(t_philosopher *philo);
-void		*philosopher_routine(void *arg);
+int						eat(t_philosopher *philo);
+int						sleep_think_actions(t_philosopher *philo);
+int						death_check(t_philosopher *philo);
+void					*philosopher_routine(void *arg);
 
 /* cleanup functions */
-void		clean_program(t_program *program);
+void					clean_program(t_program *program);
 
 #endif

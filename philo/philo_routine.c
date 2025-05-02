@@ -1,6 +1,5 @@
 #include "philosophers.h"
 
-
 static int	check_meals_count(t_philosopher *philo)
 {
 	int	enough_meals;
@@ -16,36 +15,45 @@ static int	check_meals_count(t_philosopher *philo)
 	return (enough_meals);
 }
 
-static int check_if_all_ate(t_program *prog)
+static int	check_if_all_ate(t_program *prog)
 {
-	int i;
-	int all_ate;
+	int	i;
+	int	all_ate;
 
+	if (prog->must_eat_count == -1)
+		return (0);
 	i = -1;
 	all_ate = 1;
 	while (++i < prog->number_of_philosophers)
 	{
 		if (!check_meals_count(&prog->philosophers[i]))
+		{
 			all_ate = 0;
+			break ;
+		}
 	}
 	return (all_ate);
 }
-
-
 
 void	*philosopher_routine(void *arg)
 {
 	t_philosopher	*philo;
 
 	philo = (t_philosopher *)arg;
-	if (philo->id % 2)
+	if (philo->id % 2 == 0)
 		ft_usleep(1);
 	while (!death_check(philo) && !is_someone_dead(philo->program))
 	{
 		if (eat(philo))
 			break ;
-		if (check_if_all_ate(philo->program))
+		if (philo->program->must_eat_count != -1
+			&& check_if_all_ate(philo->program))
+		{
+			pthread_mutex_lock(&philo->program->death_status);
+			philo->program->someone_died = 1;
+			pthread_mutex_unlock(&philo->program->death_status);
 			break ;
+		}
 		if (sleep_think_actions(philo))
 			break ;
 	}

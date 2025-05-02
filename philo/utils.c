@@ -22,18 +22,18 @@ int	is_someone_dead(t_program *prog)
 	return (status);
 }
 
-void print_status(t_philosopher *philo, char *status)
+void	print_status(t_philosopher *philo, char *status)
 {
-    long long current_time;
+	long long	current_time;
 
-    if (!death_check(philo) && !is_someone_dead(philo->program))
-    {
-        pthread_mutex_lock(&philo->program->print);
-        if (!is_someone_dead(philo->program))
-        {
-            current_time = get_current_time() - philo->program->start_time;
-            printf("%lld %d %s\n", current_time, philo->id + 1, status);
-        }
-        pthread_mutex_unlock(&philo->program->print);
-    }
+	if (!death_check(philo) && !is_someone_dead(philo->program))
+	{
+		pthread_mutex_lock(&philo->program->print);
+		if (!is_someone_dead(philo->program))
+		{
+			current_time = get_time() - philo->program->start_time;
+			printf("%lld %d %s\n", current_time, philo->id + 1, status);
+		}
+		pthread_mutex_unlock(&philo->program->print);
+	}
 }
