@@ -5,7 +5,8 @@ int	init_mutexes(t_program *program)
 	int	i;
 
 	if (pthread_mutex_init(&program->print, NULL)
-		|| pthread_mutex_init(&program->death_status, NULL))
+		|| pthread_mutex_init(&program->death_status, NULL)
+		|| pthread_mutex_init(&program->turn_mutex, NULL))
 		return (1);
 	i = 0;
 	while (i < program->number_of_philosophers)
@@ -35,9 +36,9 @@ void	init_philosophers(t_program *program)
 	while (i < program->number_of_philosophers)
 	{
 		program->philosophers[i].id = i;
-		program->philosophers[i].left_fork = &program->forks[(i + 1)
+		program->philosophers[i].right_fork = &program->forks[(i + 1)
 			% program->number_of_philosophers];
-		program->philosophers[i].right_fork = &program->forks[i];
+		program->philosophers[i].left_fork = &program->forks[i];
 		program->philosophers[i].program = program;
 		program->philosophers[i].number_of_meals = 0;
 		i++;
@@ -48,14 +49,20 @@ static int	create_threads(t_program *program)
 {
 	int	i;
 
-	program->start_time = get_time();
 	i = 0;
+	program->start_time = get_time();
 	while (i < program->number_of_philosophers)
 	{
 		program->philosophers[i].last_meal = get_time();
 		if (pthread_create(&program->threads[i], NULL, philosopher_routine,
 				&program->philosophers[i]))
 			return (1);
+		if (program->number_of_philosophers > 50)
+            ft_usleep(5);
+		else if (program->number_of_philosophers > 100)
+            ft_usleep(10);
+		else if (program->number_of_philosophers > 150)
+            ft_usleep(15);
 		i++;
 	}
 	return (0);
@@ -63,6 +70,7 @@ static int	create_threads(t_program *program)
 
 int	init_program(t_program *program)
 {
+	program->current_turn = 0;
 	program->someone_died = 0;
 	program->forks = malloc(sizeof(pthread_mutex_t)
 			* program->number_of_philosophers);
@@ -107,6 +115,7 @@ void	clean_program(t_program *program)
 		}
 		pthread_mutex_destroy(&program->print);
 		pthread_mutex_destroy(&program->death_status);
+		pthread_mutex_destroy(&program->turn_mutex);
 		free(program->forks);
 		free(program->threads);
 		free(program->philosophers);

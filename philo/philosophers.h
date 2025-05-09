@@ -33,6 +33,8 @@ typedef struct s_program
 	pthread_mutex_t		*forks;
 	pthread_t			*threads;
 	t_philosopher		*philosophers;
+	pthread_mutex_t		turn_mutex;
+	int					current_turn;
 }						t_program;
 
 /* time functions */
@@ -42,7 +44,8 @@ void					ft_usleep(long time_in_ms);
 /* utility functions */
 void					print_status(t_philosopher *philo, char *status);
 void					ft_putstr(char *str);
-int						is_someone_dead(t_program *prog);
+int						get_death_status(t_program *prog);
+void					set_death_status(t_philosopher *philo);
 
 /* initialization functions */
 int						check_args(int ac, char **av);
