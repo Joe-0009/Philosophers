@@ -35,27 +35,27 @@ static int	check_if_all_ate(t_program *prog)
 	return (all_ate);
 }
 
-void    *philosopher_routine(void *arg)
+void	*philosopher_routine(void *arg)
 {
-    t_philosopher    *philo;
+	t_philosopher	*philo;
 
-    philo = (t_philosopher *)arg;
-     if (philo->id % 2 != 0)
-         ft_usleep(10);
-    while (!death_check(philo) && !get_death_status(philo->program))
-    {
-        if (eat(philo))
-            break ;
-        if (philo->program->must_eat_count != -1
-            && check_if_all_ate(philo->program))
-        {
-            set_death_status(philo);
-            break ;
-        }
-        if (sleep_think_actions(philo))
-            break ;
-    }
-    return (NULL);
+	philo = (t_philosopher *)arg;
+	if (philo->id % 2 != 0)
+		ft_usleep(10);
+	while (!death_check(philo) && !get_death_status(philo->program))
+	{
+		if (eat(philo))
+			break ;
+		if (philo->program->must_eat_count != -1
+			&& check_if_all_ate(philo->program))
+		{
+			set_death_status(philo);
+			break ;
+		}
+		if (sleep_think_actions(philo))
+			break ;
+	}
+	return (NULL);
 }
 
 void	*philosopher_routine_3(void *arg)
@@ -63,8 +63,6 @@ void	*philosopher_routine_3(void *arg)
 	t_philosopher	*philo;
 
 	philo = (t_philosopher *)arg;
-	if (philo->id % 2 == 0)
-        ft_usleep(philo->program->time_to_eat / 2);
 	while (!death_check(philo) && !get_death_status(philo->program))
 	{
 		if (eat_3(philo))

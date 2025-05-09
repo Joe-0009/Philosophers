@@ -5,6 +5,7 @@
 # include <pthread.h>
 # include <stdio.h>
 # include <stdlib.h>
+# include <string.h>
 # include <sys/time.h>
 # include <unistd.h>
 
@@ -43,10 +44,10 @@ void					ft_usleep(long time_in_ms);
 
 /* utility functions */
 void					print_status(t_philosopher *philo, char *status);
-void					ft_putstr(char *str);
 int						get_death_status(t_program *prog);
 void					set_death_status(t_philosopher *philo);
-
+long long				get_meal_time(t_philosopher *philo);
+void					set_meal_time(t_philosopher *philo);
 /* initialization functions */
 int						check_args(int ac, char **av);
 int						init_program_args(t_program *program, int ac,
@@ -56,10 +57,15 @@ int						init_mutexes(t_program *program);
 void					init_philosophers(t_program *program);
 
 /* philosopher actions */
+void					take_forks_3(t_philosopher *philo,
+							pthread_mutex_t **first_fork,
+							pthread_mutex_t **second_fork);
 int						eat(t_philosopher *philo);
+int						eat_3(t_philosopher *philo);
 int						sleep_think_actions(t_philosopher *philo);
 int						death_check(t_philosopher *philo);
 void					*philosopher_routine(void *arg);
+void					*philosopher_routine_3(void *arg);
 
 /* cleanup functions */
 void					clean_program(t_program *program);

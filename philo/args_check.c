@@ -47,9 +47,9 @@ int	check_args(int ac, char **av)
 
 	if (ac != 5 && ac != 6)
 	{
-		ft_putstr("Error: Wrong number of arguments\n");
-		ft_putstr("Usage: ./philo number_of_philosophers time_to_die ");
-		ft_putstr("time_to_eat time_to_sleep [number_of_times_must_eat]\n");
+		printf("Error: Wrong number of arguments\n");
+		printf("Usage: ./philo number_of_philosophers time_to_die ");
+		printf("time_to_eat time_to_sleep [number_of_times_must_eat]\n");
 		return (1);
 	}
 	i = 0;
@@ -57,7 +57,7 @@ int	check_args(int ac, char **av)
 	{
 		if (!is_number(av[i]))
 		{
-			ft_putstr("Error: Arguments must be positive numbers\n");
+			printf("Error: Arguments must be positive numbers\n");
 			return (1);
 		}
 	}
@@ -77,12 +77,12 @@ int	init_program_args(t_program *program, int ac, char **av)
 		|| program->time_to_eat <= 0 || program->time_to_sleep <= 0
 		|| (ac == 6 && program->must_eat_count <= 0))
 	{
-		ft_putstr("Error: Invalid arguments (must be positive numbers)\n");
+		printf("Error: Invalid arguments (must be positive numbers)\n");
 		return (1);
 	}
 	if (program->number_of_philosophers > 200)
 	{
-		ft_putstr("Error: Too many philosophers (maximum is 200)\n");
+		printf("Error: Too many philosophers (maximum is 200)\n");
 		return (1);
 	}
 	return (0);
