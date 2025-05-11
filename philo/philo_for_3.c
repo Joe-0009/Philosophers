@@ -1,27 +1,17 @@
 #include "philosophers.h"
 
-void	take_forks_3(t_philosopher *philo, pthread_mutex_t **first_fork,
-		pthread_mutex_t **second_fork)
+void	take_forks_3(t_philosopher *philo)
 {
-	int	left_fork_id;
-	int	right_fork_id;
-
-	left_fork_id = philo->id;
-	right_fork_id = (philo->id + 1) % 3;
-	if (left_fork_id < right_fork_id)
+	if (philo->left_fork)
 	{
-		*first_fork = philo->left_fork;
-		*second_fork = philo->right_fork;
+		pthread_mutex_lock(philo->left_fork);
+		print_status(philo, "has taken a fork");
 	}
-	else
+	if (philo->right_fork)
 	{
-		*first_fork = philo->right_fork;
-		*second_fork = philo->left_fork;
+		pthread_mutex_lock(philo->right_fork);
+		print_status(philo, "has taken a fork");
 	}
-	pthread_mutex_lock(*first_fork);
-	print_status(philo, "has taken a fork");
-	pthread_mutex_lock(*second_fork);
-	print_status(philo, "has taken a fork");
 }
 
 static int	wait_for_turn(t_philosopher *philo)
@@ -38,21 +28,23 @@ static int	wait_for_turn(t_philosopher *philo)
 	return (0);
 }
 
-static int	release_resources_on_death(t_philosopher *philo,
-		pthread_mutex_t *first_fork, pthread_mutex_t *second_fork)
+static int	release_resources_on_death(t_philosopher *philo)
 {
-	pthread_mutex_unlock(first_fork);
-	pthread_mutex_unlock(second_fork);
+	if (philo->left_fork)
+		pthread_mutex_unlock(philo->left_fork);
+	if (philo->right_fork)
+		pthread_mutex_unlock(philo->right_fork);
 	pthread_mutex_unlock(&philo->program->turn_mutex);
 	return (1);
 }
 
-static void	finish_eating_and_update_turn(t_philosopher *philo,
-		pthread_mutex_t *first_fork, pthread_mutex_t *second_fork)
+static void	finish_eating_and_update_turn(t_philosopher *philo)
 {
-	ft_usleep(philo->program->time_to_eat, philo->program);
-	pthread_mutex_unlock(first_fork);
-	pthread_mutex_unlock(second_fork);
+	ft_usleep(philo->program->time_to_eat);
+	if (philo->left_fork)
+		pthread_mutex_unlock(philo->left_fork);
+	if (philo->right_fork)
+		pthread_mutex_unlock(philo->right_fork);
 	if (!get_death_status(philo->program))
 		philo->program->current_turn = (philo->program->current_turn + 1) % 3;
 	pthread_mutex_unlock(&philo->program->turn_mutex);
@@ -60,21 +52,19 @@ static void	finish_eating_and_update_turn(t_philosopher *philo,
 
 int	eat_3(t_philosopher *philo)
 {
-	int				dead;
-	pthread_mutex_t	*first_fork;
-	pthread_mutex_t	*second_fork;
+	int	dead;
 
 	dead = death_check(philo) || get_death_status(philo->program);
 	if (dead)
 		return (1);
 	if (wait_for_turn(philo))
 		return (1);
-	take_forks_3(philo, &first_fork, &second_fork);
+	take_forks_3(philo);
 	dead = death_check(philo) || get_death_status(philo->program);
 	if (dead)
-		return (release_resources_on_death(philo, first_fork, second_fork));
+		return (release_resources_on_death(philo));
 	print_status(philo, "is eating");
 	set_meal_time(philo);
-	finish_eating_and_update_turn(philo, first_fork, second_fork);
+	finish_eating_and_update_turn(philo);
 	return (0);
 }

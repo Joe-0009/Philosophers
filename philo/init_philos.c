@@ -1,19 +1,13 @@
 #include "philosophers.h"
 
-static void	init_group_of_three(t_program *program, int start_idx)
+static void	init_group_of_three(t_program *program)
 {
-	int	i;
-	int	philo_idx;
-
-	i = 0;
-	while (i < 3 && (start_idx + i) < program->number_of_philosophers)
-	{
-		philo_idx = start_idx + i;
-		program->philosophers[philo_idx].left_fork = &program->forks[philo_idx];
-		program->philosophers[philo_idx].right_fork = &program->forks[(philo_idx
-				+ 1) % 3];
-		i++;
-	}
+	program->philosophers[0].left_fork = &program->forks[0];
+	program->philosophers[0].right_fork = &program->forks[1];
+	program->philosophers[0].left_fork = &program->forks[1];
+	program->philosophers[0].right_fork = &program->forks[2];
+	program->philosophers[0].left_fork = &program->forks[2];
+	program->philosophers[0].right_fork = &program->forks[0];
 }
 
 static void	init_group_of_two(t_program *program, int start_idx)
@@ -59,7 +53,7 @@ static void	init_groups(t_program *program)
 	num_philos = program->number_of_philosophers;
 	if (num_philos % 2 != 0)
 	{
-		init_group_of_three(program, 0);
+		init_group_of_three(program);
 		i = 3;
 		while (i < num_philos)
 		{

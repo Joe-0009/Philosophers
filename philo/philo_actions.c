@@ -36,11 +36,6 @@ static void	take_forks(t_philosopher *philo, pthread_mutex_t **first_fork,
 	}
 	pthread_mutex_lock(*first_fork);
 	print_status(philo, "has taken a fork");
-	if (get_death_status(philo->program))
-	{
-		pthread_mutex_unlock(*first_fork);
-		return ;
-	}
 	pthread_mutex_lock(*second_fork);
 	print_status(philo, "has taken a fork");
 }
@@ -64,7 +59,7 @@ int	eat(t_philosopher *philo)
 	}
 	print_status(philo, "is eating");
 	set_meal_time(philo);
-	ft_usleep(philo->program->time_to_eat, philo->program);
+	ft_usleep(philo->program->time_to_eat);
 	pthread_mutex_unlock(first_fork);
 	pthread_mutex_unlock(second_fork);
 	return (0);
@@ -75,7 +70,7 @@ int	sleep_think_actions(t_philosopher *philo)
 	if (death_check(philo) || get_death_status(philo->program))
 		return (1);
 	print_status(philo, "is sleeping");
-	ft_usleep(philo->program->time_to_sleep, philo->program);
+	ft_usleep(philo->program->time_to_sleep);
 	if (death_check(philo) || get_death_status(philo->program))
 		return (1);
 	print_status(philo, "is thinking");

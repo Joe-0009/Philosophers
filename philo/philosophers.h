@@ -40,7 +40,7 @@ typedef struct s_program
 
 /* time functions */
 long					get_time(void);
-void					ft_usleep(long time_in_ms, t_program *program);
+void					ft_usleep(long time_in_ms);
 
 /* utility functions */
 void					print_status(t_philosopher *philo, char *status);
@@ -58,9 +58,7 @@ int						init_mutexes(t_program *program);
 void					init_philosophers(t_program *program);
 
 /* philosopher actions */
-void					take_forks_3(t_philosopher *philo,
-							pthread_mutex_t **first_fork,
-							pthread_mutex_t **second_fork);
+void					take_forks_3(t_philosopher *philo);
 int						eat(t_philosopher *philo);
 int						eat_3(t_philosopher *philo);
 int						sleep_think_actions(t_philosopher *philo);

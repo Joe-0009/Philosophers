@@ -8,17 +8,12 @@ long	get_time(void)
 	return (tv.tv_sec * 1000 + tv.tv_usec / 1000);
 }
 
-void	ft_usleep(long time_in_ms, t_program *program)
+void	ft_usleep(long time_in_ms)
 {
 	long	start;
-
 	start = get_time();
 	while ((get_time() - start) < time_in_ms)
-	{
-		if (get_death_status(program))
-			break ;
-		usleep(100);
-	}	
+		usleep(50);	
 }
 
 int	ft_strncmp(const char *s1, const char *s2, size_t n)
