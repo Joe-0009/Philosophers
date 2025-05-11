@@ -40,6 +40,11 @@ static void	take_forks(t_philosopher *philo, pthread_mutex_t **first_fork,
 	}
 	pthread_mutex_lock(*first_fork);
 	print_status(philo, "has taken a fork");
+	if (get_death_status(philo->program))
+	{
+		pthread_mutex_unlock(*first_fork);
+		return ;
+	}
 	pthread_mutex_lock(*second_fork);
 	print_status(philo, "has taken a fork");
 }

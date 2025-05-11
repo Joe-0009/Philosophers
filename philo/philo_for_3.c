@@ -7,7 +7,7 @@ void	take_forks_3(t_philosopher *philo, pthread_mutex_t **first_fork,
 	int	right_fork_id;
 
 	left_fork_id = philo->id;
-	right_fork_id = (philo->id + 1) % philo->program->number_of_philosophers;
+	right_fork_id = (philo->id + 1) % 3;
 	if (left_fork_id < right_fork_id)
 	{
 		*first_fork = philo->left_fork;
@@ -54,7 +54,8 @@ static void	finish_eating_and_update_turn(t_philosopher *philo,
 	ft_usleep(philo->program->time_to_eat);
 	pthread_mutex_unlock(first_fork);
 	pthread_mutex_unlock(second_fork);
-	philo->program->current_turn = (philo->program->current_turn + 1) % 3;
+	if (!get_death_status(philo->program))
+		philo->program->current_turn = (philo->program->current_turn + 1) % 3;
 	pthread_mutex_unlock(&philo->program->turn_mutex);
 }
 
