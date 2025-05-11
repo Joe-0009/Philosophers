@@ -40,7 +40,7 @@ typedef struct s_program
 
 /* time functions */
 long					get_time(void);
-void					ft_usleep(long time_in_ms);
+void					ft_usleep(long time_in_ms, t_program *program);
 
 /* utility functions */
 void					print_status(t_philosopher *philo, char *status);
@@ -48,6 +48,7 @@ int						get_death_status(t_program *prog);
 void					set_death_status(t_philosopher *philo);
 long long				get_meal_time(t_philosopher *philo);
 void					set_meal_time(t_philosopher *philo);
+int						ft_strncmp(const char *s1, const char *s2, size_t n);
 /* initialization functions */
 int						check_args(int ac, char **av);
 int						init_program_args(t_program *program, int ac,

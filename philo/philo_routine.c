@@ -41,7 +41,7 @@ void	*philosopher_routine(void *arg)
 
 	philo = (t_philosopher *)arg;
 	if (philo->id % 2 != 0)
-		ft_usleep(10);
+		ft_usleep(10, philo->program);
 	while (!death_check(philo) && !get_death_status(philo->program))
 	{
 		if (eat(philo))

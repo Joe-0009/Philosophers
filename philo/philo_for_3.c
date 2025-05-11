@@ -34,7 +34,6 @@ static int	wait_for_turn(t_philosopher *philo)
 		pthread_mutex_unlock(&philo->program->turn_mutex);
 		if (death_check(philo) || get_death_status(philo->program))
 			return (1);
-		ft_usleep(1);
 	}
 	return (0);
 }
@@ -51,7 +50,7 @@ static int	release_resources_on_death(t_philosopher *philo,
 static void	finish_eating_and_update_turn(t_philosopher *philo,
 		pthread_mutex_t *first_fork, pthread_mutex_t *second_fork)
 {
-	ft_usleep(philo->program->time_to_eat);
+	ft_usleep(philo->program->time_to_eat, philo->program);
 	pthread_mutex_unlock(first_fork);
 	pthread_mutex_unlock(second_fork);
 	if (!get_death_status(philo->program))
