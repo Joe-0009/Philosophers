@@ -4,10 +4,10 @@ static void	init_group_of_three(t_program *program)
 {
 	program->philosophers[0].left_fork = &program->forks[0];
 	program->philosophers[0].right_fork = &program->forks[1];
-	program->philosophers[0].left_fork = &program->forks[1];
-	program->philosophers[0].right_fork = &program->forks[2];
-	program->philosophers[0].left_fork = &program->forks[2];
-	program->philosophers[0].right_fork = &program->forks[0];
+	program->philosophers[1].left_fork = &program->forks[1];
+	program->philosophers[1].right_fork = &program->forks[2];
+	program->philosophers[2].left_fork = &program->forks[2];
+	program->philosophers[2].right_fork = &program->forks[0];
 }
 
 static void	init_group_of_two(t_program *program, int start_idx)

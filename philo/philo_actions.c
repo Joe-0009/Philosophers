@@ -13,6 +13,7 @@ int	death_check(t_philosopher *philo)
 	{
 		if (!get_death_status(philo->program))
 		{
+			 printf("diffrence :%llu \n", current_time - last_meal_time);
 			set_death_status(philo);
 			print_status(philo, "died");
 		}
@@ -21,47 +22,44 @@ int	death_check(t_philosopher *philo)
 	return (0);
 }
 
-static void	take_forks(t_philosopher *philo, pthread_mutex_t **first_fork,
-		pthread_mutex_t **second_fork)
+static void take_forks(t_philosopher *philo)
 {
-	if (philo->id % 2 != 0)
-	{
-		*first_fork = philo->right_fork;
-		*second_fork = philo->left_fork;
-	}
-	else
-	{
-		*first_fork = philo->left_fork;
-		*second_fork = philo->right_fork;
-	}
-	pthread_mutex_lock(*first_fork);
-	print_status(philo, "has taken a fork");
-	pthread_mutex_lock(*second_fork);
-	print_status(philo, "has taken a fork");
+    if (philo->id % 2 == 0)
+    {
+        pthread_mutex_lock(philo->right_fork);
+        print_status(philo, "has taken a fork");
+        pthread_mutex_lock(philo->left_fork);
+        print_status(philo, "has taken a fork");
+    }
+    else
+    {
+        pthread_mutex_lock(philo->left_fork);
+        print_status(philo, "has taken a fork");
+        pthread_mutex_lock(philo->right_fork);
+        print_status(philo, "has taken a fork");
+    }
 }
 
 int	eat(t_philosopher *philo)
 {
 	int				dead;
-	pthread_mutex_t	*first_fork;
-	pthread_mutex_t	*second_fork;
 
 	dead = death_check(philo) || get_death_status(philo->program);
 	if (dead)
 		return (1);
-	take_forks(philo, &first_fork, &second_fork);
+	take_forks(philo);
 	dead = death_check(philo) || get_death_status(philo->program);
 	if (dead)
 	{
-		pthread_mutex_unlock(first_fork);
-		pthread_mutex_unlock(second_fork);
+		pthread_mutex_unlock(philo->right_fork);
+		pthread_mutex_unlock(philo->left_fork);
 		return (1);
 	}
 	print_status(philo, "is eating");
 	set_meal_time(philo);
 	ft_usleep(philo->program->time_to_eat);
-	pthread_mutex_unlock(first_fork);
-	pthread_mutex_unlock(second_fork);
+	pthread_mutex_unlock(philo->left_fork);
+	pthread_mutex_unlock(philo->right_fork);
 	return (0);
 }
 
