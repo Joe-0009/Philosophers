@@ -22,27 +22,27 @@ int	death_check(t_philosopher *philo)
 	return (0);
 }
 
-static void take_forks(t_philosopher *philo)
+static void	take_forks(t_philosopher *philo)
 {
-    if (philo->id % 2 == 0)
-    {
-        pthread_mutex_lock(philo->right_fork);
-        print_status(philo, "has taken a fork");
-        pthread_mutex_lock(philo->left_fork);
-        print_status(philo, "has taken a fork");
-    }
-    else
-    {
-        pthread_mutex_lock(philo->left_fork);
-        print_status(philo, "has taken a fork");
-        pthread_mutex_lock(philo->right_fork);
-        print_status(philo, "has taken a fork");
-    }
+	if (philo->id % 2 == 0)
+	{
+		pthread_mutex_lock(philo->right_fork);
+		print_status(philo, "has taken a fork");
+		pthread_mutex_lock(philo->left_fork);
+		print_status(philo, "has taken a fork");
+	}
+	else
+	{
+		pthread_mutex_lock(philo->left_fork);
+		print_status(philo, "has taken a fork");
+		pthread_mutex_lock(philo->right_fork);
+		print_status(philo, "has taken a fork");
+	}
 }
 
 int	eat(t_philosopher *philo)
 {
-	int				dead;
+	int	dead;
 
 	dead = death_check(philo) || get_death_status(philo->program);
 	if (dead)
