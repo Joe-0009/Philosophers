@@ -13,7 +13,6 @@ int	death_check(t_philosopher *philo)
 	{
 		if (!get_death_status(philo->program))
 		{
-			//  printf("diffrence :%llu \n", current_time - last_meal_time);
 			set_death_status(philo);
 			print_status(philo, "died");
 		}
