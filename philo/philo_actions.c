@@ -9,11 +9,11 @@ int	death_check(t_philosopher *philo)
 		return (1);
 	last_meal_time = get_meal_time(philo);
 	current_time = get_time();
-	if (current_time - last_meal_time > philo->program->time_to_die)
+	if (current_time - last_meal_time >= philo->program->time_to_die)
 	{
 		if (!get_death_status(philo->program))
 		{
-			 printf("diffrence :%llu \n", current_time - last_meal_time);
+			//  printf("diffrence :%llu \n", current_time - last_meal_time);
 			set_death_status(philo);
 			print_status(philo, "died");
 		}
@@ -57,7 +57,7 @@ int	eat(t_philosopher *philo)
 	}
 	print_status(philo, "is eating");
 	set_meal_time(philo);
-	ft_usleep(philo->program->time_to_eat);
+	ft_usleep(philo->program->time_to_eat, philo->program);
 	pthread_mutex_unlock(philo->left_fork);
 	pthread_mutex_unlock(philo->right_fork);
 	return (0);
@@ -68,7 +68,7 @@ int	sleep_think_actions(t_philosopher *philo)
 	if (death_check(philo) || get_death_status(philo->program))
 		return (1);
 	print_status(philo, "is sleeping");
-	ft_usleep(philo->program->time_to_sleep);
+	ft_usleep(philo->program->time_to_sleep, philo->program);
 	if (death_check(philo) || get_death_status(philo->program))
 		return (1);
 	print_status(philo, "is thinking");
